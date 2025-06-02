@@ -130,25 +130,31 @@ class Level:
         
         # Create platforms throughout the level
         # First section
+        platform1_y = HEIGHT - 180
         for x in range(200, 400, TILE_SIZE):
-            Tile((x, HEIGHT - 180), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+            Tile((x, platform1_y), TILE_SIZE, [self.all_sprites, self.collision_sprites])
         
+        platform2_y = HEIGHT - 260
         for x in range(500, 700, TILE_SIZE):
-            Tile((x, HEIGHT - 260), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+            Tile((x, platform2_y), TILE_SIZE, [self.all_sprites, self.collision_sprites])
         
         # Middle section
+        platform3_y = HEIGHT - 200
         for x in range(WIDTH + 100, WIDTH + 300, TILE_SIZE):
-            Tile((x, HEIGHT - 200), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+            Tile((x, platform3_y), TILE_SIZE, [self.all_sprites, self.collision_sprites])
         
+        platform4_y = HEIGHT - 300
         for x in range(WIDTH + 400, WIDTH + 700, TILE_SIZE):
-            Tile((x, HEIGHT - 300), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+            Tile((x, platform4_y), TILE_SIZE, [self.all_sprites, self.collision_sprites])
         
         # Final section
+        platform5_y = HEIGHT - 220
         for x in range(WIDTH * 2, WIDTH * 2 + 300, TILE_SIZE):
-            Tile((x, HEIGHT - 220), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+            Tile((x, platform5_y), TILE_SIZE, [self.all_sprites, self.collision_sprites])
         
+        platform6_y = HEIGHT - 350
         for x in range(WIDTH * 2 + 400, WIDTH * 2 + 800, TILE_SIZE):
-            Tile((x, HEIGHT - 350), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+            Tile((x, platform6_y), TILE_SIZE, [self.all_sprites, self.collision_sprites])
         
         # Create hazards throughout the level
         Hazard((300, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
@@ -166,14 +172,18 @@ class Level:
         Enemy((WIDTH * 2 + 500, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'jumping')
         Enemy((WIDTH * 2 + 700, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
         
-        # Create power-ups throughout the level with collision detection
-        # Place them directly on platforms to prevent falling
-        PowerUp((250, HEIGHT - 250 - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
-        PowerUp((550, HEIGHT - 350 - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
-        PowerUp((WIDTH + 150, HEIGHT - 300 - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
-        PowerUp((WIDTH + 650, HEIGHT - 400 - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
-        PowerUp((WIDTH * 2 + 350, HEIGHT - 320 - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
-        PowerUp((WIDTH * 2 + 700, HEIGHT - 450 - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
+        # Create power-ups throughout the level - FIXED: Place them directly ON platforms
+        # First section powerups
+        PowerUp((250, platform1_y - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
+        PowerUp((550, platform2_y - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
+        
+        # Middle section powerups
+        PowerUp((WIDTH + 150, platform3_y - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
+        PowerUp((WIDTH + 650, platform4_y - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
+        
+        # Final section powerups
+        PowerUp((WIDTH * 2 + 350, platform5_y - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
+        PowerUp((WIDTH * 2 + 700, platform6_y - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
         
         # Create finish flag at the end of the extended level
         FinishFlag((WIDTH * 3 - 100, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.finish_sprites])
@@ -307,9 +317,10 @@ class Level:
             self.display_surface.blit(sprite.image, offset_pos)
     
     def draw_background(self):
-        """Draw a gradient background"""
+        """Draw a gradient background with clouds"""
         # Create a gradient from blue to light blue
         height = self.display_surface.get_height()
+        width = self.display_surface.get_width()
         
         # Sky gradient
         for y in range(0, height // 2):
@@ -319,7 +330,57 @@ class Level:
             g = int(150 + (y / (height // 2)) * 66)
             b = int(235)
             
-            pygame.draw.line(self.display_surface, (r, g, b), (0, y), (WIDTH, y))
+            pygame.draw.line(self.display_surface, (r, g, b), (0, y), (width, y))
+        
+        # Draw clouds
+        # Use a deterministic approach based on game time to create moving clouds
+        cloud_time = pygame.time.get_ticks() // 50  # Slow cloud movement
+        
+        # Draw several clouds at different heights and sizes
+        self.draw_cloud(width * 0.1 - (cloud_time % width) * 0.02, height * 0.1, 60, 30)
+        self.draw_cloud(width * 0.5 - (cloud_time % width) * 0.015, height * 0.15, 80, 40)
+        self.draw_cloud(width * 0.8 - (cloud_time % width) * 0.01, height * 0.05, 70, 35)
+        self.draw_cloud(width * 0.3 - (cloud_time % width) * 0.025, height * 0.2, 90, 45)
+        
+        # Draw sun
+        sun_x = width * 0.8
+        sun_y = height * 0.15
+        sun_radius = 40
+        
+        # Draw sun glow
+        for i in range(5, 0, -1):
+            alpha = 100 - i * 15
+            color = (255, 255, 200, alpha)
+            glow_surf = pygame.Surface((sun_radius * 2 * i, sun_radius * 2 * i), pygame.SRCALPHA)
+            pygame.draw.circle(glow_surf, color, (sun_radius * i, sun_radius * i), sun_radius * i)
+            self.display_surface.blit(glow_surf, (sun_x - sun_radius * i, sun_y - sun_radius * i))
+        
+        # Draw sun body
+        pygame.draw.circle(self.display_surface, (255, 255, 200), (sun_x, sun_y), sun_radius)
+        pygame.draw.circle(self.display_surface, (255, 255, 100), (sun_x, sun_y), sun_radius - 5)
+    
+    def draw_cloud(self, x, y, width, height):
+        """Draw a fluffy cloud"""
+        cloud_color = (255, 255, 255, 180)  # Semi-transparent white
+        
+        # Create a surface for the cloud
+        cloud_surf = pygame.Surface((width, height), pygame.SRCALPHA)
+        
+        # Draw several overlapping circles to create a cloud shape
+        circle_radius = height // 2
+        positions = [
+            (circle_radius, circle_radius),
+            (width // 3, circle_radius // 2),
+            (width // 2, circle_radius),
+            (2 * width // 3, circle_radius // 2),
+            (width - circle_radius, circle_radius)
+        ]
+        
+        for pos in positions:
+            pygame.draw.circle(cloud_surf, cloud_color, pos, circle_radius)
+        
+        # Blit the cloud to the display surface
+        self.display_surface.blit(cloud_surf, (x, y))
     
     def start(self):
         """Start the level"""
