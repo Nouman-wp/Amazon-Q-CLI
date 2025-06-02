@@ -177,6 +177,7 @@ class Game:
             # Handle menu navigation and selection manually
             for event in events:
                 if event.type == pygame.KEYDOWN:
+                    print(f"Key pressed in main menu: {pygame.key.name(event.key)}")
                     if event.key == pygame.K_RETURN:
                         # Get the currently selected widget
                         selected_widget = self.ui.main_menu.get_selected_widget()
@@ -226,6 +227,7 @@ class Game:
             # Handle menu selection
             for event in events:
                 if event.type == pygame.KEYDOWN:
+                    print(f"Key pressed in pause menu: {pygame.key.name(event.key)}")
                     if event.key == pygame.K_RETURN:
                         selected_widget = self.ui.pause_menu.get_selected_widget()
                         if selected_widget:
@@ -240,6 +242,9 @@ class Game:
                                 self.quit_to_menu()
         
         elif self.state == STATE_GAME_OVER:
+            # Fill with dark background
+            self.screen.fill((20, 20, 20))
+            
             # Handle game over menu events
             events = pygame.event.get()
             
@@ -256,7 +261,7 @@ class Game:
             # Handle menu selection
             for event in events:
                 if event.type == pygame.KEYDOWN:
-                    print(f"Key pressed in game over menu: {event.key}")
+                    print(f"Key pressed in game over menu: {pygame.key.name(event.key)}")
                     if event.key == pygame.K_RETURN:
                         selected_widget = self.ui.game_over_menu.get_selected_widget()
                         if selected_widget:
@@ -269,6 +274,9 @@ class Game:
                                 self.quit_to_menu()
         
         elif self.state == STATE_VICTORY:
+            # Fill with victory background
+            self.screen.fill((20, 50, 20))
+            
             # Handle victory menu events
             events = pygame.event.get()
             
@@ -285,7 +293,7 @@ class Game:
             # Handle menu selection
             for event in events:
                 if event.type == pygame.KEYDOWN:
-                    print(f"Key pressed in victory menu: {event.key}")
+                    print(f"Key pressed in victory menu: {pygame.key.name(event.key)}")
                     if event.key == pygame.K_RETURN:
                         selected_widget = self.ui.victory_menu.get_selected_widget()
                         if selected_widget:
@@ -298,6 +306,13 @@ class Game:
                                 self.restart_level()
                             elif title == 'Quit to Menu':
                                 self.quit_to_menu()
+                    # Also handle arrow keys for menu navigation
+                    elif event.key == pygame.K_UP:
+                        print("UP key pressed in victory menu")
+                        self.ui.victory_menu.select_widget(self.ui.victory_menu.get_selected_widget_index() - 1)
+                    elif event.key == pygame.K_DOWN:
+                        print("DOWN key pressed in victory menu")
+                        self.ui.victory_menu.select_widget(self.ui.victory_menu.get_selected_widget_index() + 1)
         
         elif self.state == STATE_LEADERBOARD:
             # Draw leaderboard

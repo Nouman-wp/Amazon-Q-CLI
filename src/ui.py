@@ -29,6 +29,9 @@ class UI:
         """Create the main menu"""
         theme = pygame_menu.themes.THEME_DARK.copy()
         theme.widget_font_size = 36
+        theme.title_font_size = 60
+        theme.title_background_color = (0, 0, 100)
+        theme.background_color = (0, 0, 50, 200)
         
         self.main_menu = pygame_menu.Menu(
             'SpeedRunner X', 
@@ -38,8 +41,14 @@ class UI:
             keyboard_enabled=True
         )
         
+        # Add a decorative header
+        self.main_menu.add.label('Welcome to the Game!', font_size=40)
+        self.main_menu.add.vertical_margin(30)
+        
+        # Add menu buttons
         self.main_menu.add.button('Start Game', self.start_game)
         self.main_menu.add.button('Leaderboard', self.show_leaderboard)
+        self.main_menu.add.vertical_margin(20)
         self.main_menu.add.button('Exit', pygame_menu.events.EXIT)
     
     def create_pause_menu(self):
@@ -63,6 +72,9 @@ class UI:
         """Create the game over menu"""
         theme = pygame_menu.themes.THEME_DARK.copy()
         theme.widget_font_size = 32
+        theme.title_font_size = 40
+        theme.title_background_color = (150, 0, 0)  # Dark red
+        theme.background_color = (50, 0, 0, 200)  # Semi-transparent dark red
         
         self.game_over_menu = pygame_menu.Menu(
             'Game Over', 
@@ -72,6 +84,8 @@ class UI:
             keyboard_enabled=True
         )
         
+        self.game_over_menu.add.label('You lost all your lives!')
+        self.game_over_menu.add.vertical_margin(20)  # Add some space
         self.game_over_menu.add.button('Retry Level', self.restart_level)
         self.game_over_menu.add.button('Quit to Menu', self.quit_to_menu)
     
@@ -79,6 +93,9 @@ class UI:
         """Create the victory menu"""
         theme = pygame_menu.themes.THEME_DARK.copy()
         theme.widget_font_size = 32
+        theme.title_font_size = 40
+        theme.title_background_color = (0, 100, 0)  # Dark green
+        theme.background_color = (20, 50, 20, 200)  # Semi-transparent dark green
         
         self.victory_menu = pygame_menu.Menu(
             'Level Complete!', 
@@ -90,6 +107,7 @@ class UI:
         
         self.victory_time_label = self.victory_menu.add.label('Your Time: 00:00.000')
         self.victory_best_label = self.victory_menu.add.label('Best Time: 00:00.000')
+        self.victory_menu.add.vertical_margin(20)  # Add some space
         self.victory_menu.add.button('Next Level', self.next_level)
         self.victory_menu.add.button('Retry Level', self.restart_level)
         self.victory_menu.add.button('Quit to Menu', self.quit_to_menu)

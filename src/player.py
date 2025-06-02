@@ -298,6 +298,8 @@ class Player(pygame.sprite.Sprite):
     def jump(self):
         if self.on_ground:
             self.direction.y = -self.jump_strength
+            # Increase jump height to reach higher platforms
+            self.direction.y *= 1.2  # 20% higher jump
         elif self.on_wall:
             # Wall jump - push away from wall
             self.direction.y = -self.wall_jump_strength
