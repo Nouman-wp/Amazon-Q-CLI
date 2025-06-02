@@ -58,6 +58,8 @@ class Game:
     def load_level(self, level_name):
         """Load a level"""
         self.level = Level(level_name, self.screen)
+        # Pass UI reference to level for powerup notifications
+        self.level.ui = self.ui
     
     def start_game(self):
         """Start the game"""
@@ -66,6 +68,13 @@ class Game:
         self.countdown = 3
         self.countdown_timer = pygame.time.get_ticks()
         self.level.reset()
+        
+        # Ensure the level is properly initialized
+        self.level.active = False  # Will be set to True after countdown
+        self.level.completed = False
+        
+        # Reset UI timer
+        self.ui.reset_timer()
     
     def show_leaderboard(self):
         """Show the leaderboard screen"""
@@ -78,14 +87,27 @@ class Game:
     
     def restart_level(self):
         """Restart the current level"""
+        print("Restarting level...")
         self.level.reset()
         self.state = STATE_PLAYING
         self.countdown = 3
         self.countdown_timer = pygame.time.get_ticks()
+        
+        # Reset UI timer
+        self.ui.reset_timer()
+        
+        # Ensure player lives are reset
+        if self.level and self.level.player:
+            self.level.player.lives = PLAYER_START_LIVES
+            print(f"Player lives reset to {self.level.player.lives}")
     
     def quit_to_menu(self):
         """Return to the main menu"""
+        print("Quitting to main menu...")
         self.state = STATE_MENU
+        
+        # Force reload the level to ensure clean state
+        self.load_level(f"level{self.current_level}")
     
     def next_level(self):
         """Go to the next level"""
@@ -125,9 +147,11 @@ class Game:
                 if current_time - self.countdown_timer > 1000:
                     self.countdown -= 1
                     self.countdown_timer = current_time
+                    print(f"Countdown: {self.countdown}")
                     
                     if self.countdown == 0:
                         # Start level and timer
+                        print("Countdown finished, starting level")
                         self.level.start()
                         self.ui.start_timer()
             else:
@@ -177,42 +201,16 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        # Start the game directly when Enter is pressed on the main menu
+                        print("Enter key pressed on main menu, starting game...")
+                        self.start_game()
+                        return
             
             # Update and draw the menu
             self.ui.main_menu.update(events)
             self.ui.main_menu.draw(self.screen)
-            
-            # Handle menu navigation and selection manually
-            for event in events:
-                if event.type == pygame.KEYDOWN:
-                    print(f"Key pressed in main menu: {pygame.key.name(event.key)}")
-                    if event.key == pygame.K_RETURN:
-                        # Get the currently selected widget
-                        selected_widget = self.ui.main_menu.get_selected_widget()
-                        if selected_widget:
-                            title = selected_widget.get_title()
-                            print(f"Selected menu item: {title}")
-                            
-                            if title == 'Start Game':
-                                print("Starting game...")
-                                self.start_game()
-                            elif title == 'Leaderboard':
-                                print("Showing leaderboard...")
-                                self.show_leaderboard()
-                            elif title == 'Exit':
-                                print("Exiting game...")
-                                pygame.quit()
-                                sys.exit()
-                    
-                    # Also handle arrow keys for menu navigation
-                    elif event.key == pygame.K_UP:
-                        print("UP key pressed in main menu")
-                        # Move selection up (previous widget)
-                        self.ui.main_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_UP)])
-                    elif event.key == pygame.K_DOWN:
-                        print("DOWN key pressed in main menu")
-                        # Move selection down (next widget)
-                        self.ui.main_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN)])
         
         elif self.state == STATE_PLAYING:
             # Draw level
@@ -252,11 +250,11 @@ class Game:
                             title = selected_widget.get_title()
                             print(f"Selected pause menu item: {title}")
                             
-                            if title == 'Resume':
+                            if title == 'RESUME':
                                 self.resume_game()
-                            elif title == 'Restart Level':
+                            elif title == 'RESTART LEVEL':
                                 self.restart_level()
-                            elif title == 'Quit to Menu':
+                            elif title == 'QUIT TO MENU':
                                 self.quit_to_menu()
                     
                     # Also handle arrow keys for menu navigation
@@ -281,35 +279,28 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    # Direct key handling for game over menu
+                    if event.key == pygame.K_r:
+                        print("R key pressed in game over menu - restarting level")
+                        self.restart_level()
+                        return
+                    elif event.key == pygame.K_ESCAPE or event.key == pygame.K_q:
+                        print("ESC/Q key pressed in game over menu - quitting to menu")
+                        self.quit_to_menu()
+                        return
+                    elif event.key == pygame.K_RETURN:
+                        print("ENTER key pressed in game over menu - restarting level")
+                        self.restart_level()
+                        return
             
             # Update and draw the game over menu
             self.ui.game_over_menu.update(events)
             self.ui.game_over_menu.draw(self.screen)
             
-            # Handle menu selection
-            for event in events:
-                if event.type == pygame.KEYDOWN:
-                    print(f"Key pressed in game over menu: {pygame.key.name(event.key)}")
-                    if event.key == pygame.K_RETURN:
-                        selected_widget = self.ui.game_over_menu.get_selected_widget()
-                        if selected_widget:
-                            title = selected_widget.get_title()
-                            print(f"Selected game over menu item: {title}")
-                            
-                            if title == 'Retry Level':
-                                self.restart_level()
-                            elif title == 'Quit to Menu':
-                                self.quit_to_menu()
-                    
-                    # Also handle arrow keys for menu navigation
-                    elif event.key == pygame.K_UP:
-                        print("UP key pressed in game over menu")
-                        # Move selection up (previous widget)
-                        self.ui.game_over_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_UP)])
-                    elif event.key == pygame.K_DOWN:
-                        print("DOWN key pressed in game over menu")
-                        # Move selection down (next widget)
-                        self.ui.game_over_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN)])
+            # Draw additional instructions
+            instructions_text = self.ui.font_small.render("Press R to restart or ESC to quit to menu", True, WHITE)
+            self.screen.blit(instructions_text, (WIDTH/2 - instructions_text.get_width()/2, HEIGHT - 50))
         
         elif self.state == STATE_VICTORY:
             # Fill with victory background
@@ -323,36 +314,28 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    # Direct key handling for victory menu
+                    if event.key == pygame.K_n:
+                        print("N key pressed in victory menu - next level")
+                        self.next_level()
+                        return
+                    elif event.key == pygame.K_r:
+                        print("R key pressed in victory menu - restarting level")
+                        self.restart_level()
+                        return
+                    elif event.key == pygame.K_ESCAPE or event.key == pygame.K_q:
+                        print("ESC/Q key pressed in victory menu - quitting to menu")
+                        self.quit_to_menu()
+                        return
             
             # Update and draw the victory menu
             self.ui.victory_menu.update(events)
             self.ui.victory_menu.draw(self.screen)
             
-            # Handle menu selection
-            for event in events:
-                if event.type == pygame.KEYDOWN:
-                    print(f"Key pressed in victory menu: {pygame.key.name(event.key)}")
-                    if event.key == pygame.K_RETURN:
-                        selected_widget = self.ui.victory_menu.get_selected_widget()
-                        if selected_widget:
-                            title = selected_widget.get_title()
-                            print(f"Selected victory menu item: {title}")
-                            
-                            if title == 'Next Level':
-                                self.next_level()
-                            elif title == 'Retry Level':
-                                self.restart_level()
-                            elif title == 'Quit to Menu':
-                                self.quit_to_menu()
-                    # Also handle arrow keys for menu navigation
-                    elif event.key == pygame.K_UP:
-                        print("UP key pressed in victory menu")
-                        # Move selection up (previous widget)
-                        self.ui.victory_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_UP)])
-                    elif event.key == pygame.K_DOWN:
-                        print("DOWN key pressed in victory menu")
-                        # Move selection down (next widget)
-                        self.ui.victory_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN)])
+            # Draw additional instructions
+            instructions_text = self.ui.font_small.render("Press N for next level, R to restart, or ESC to quit", True, WHITE)
+            self.screen.blit(instructions_text, (WIDTH/2 - instructions_text.get_width()/2, HEIGHT - 50))
         
         elif self.state == STATE_LEADERBOARD:
             # Draw leaderboard

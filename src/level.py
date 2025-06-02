@@ -46,6 +46,9 @@ class Level:
         # Camera
         self.camera_offset = pygame.math.Vector2(0, 0)
         
+        # UI reference for powerup notifications
+        self.ui = None
+        
         # Load the level
         self.load_level()
     
@@ -106,32 +109,66 @@ class Level:
     
     def create_test_level(self):
         """Create a simple test level if no TMX file is available"""
-        # Create ground
-        for x in range(0, WIDTH + TILE_SIZE, TILE_SIZE):
-            Tile((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.collision_sprites], 'grass')
+        # Create a much longer level (3x the screen width)
+        level_width = WIDTH * 3
         
-        # Create some platforms - make them more accessible for jumping
+        # Create ground for the entire level - fill the bottom completely
+        for x in range(0, level_width + TILE_SIZE, TILE_SIZE):
+            # Create the top grass layer
+            Tile((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.collision_sprites], 'grass')
+            
+            # Fill in dirt blocks below the grass to prevent void
+            for y in range(HEIGHT, HEIGHT + TILE_SIZE * 3, TILE_SIZE):
+                Tile((x, y), TILE_SIZE, [self.all_sprites, self.collision_sprites], 'dirt')
+        
+        # Create platforms throughout the level
+        # First section
         for x in range(200, 400, TILE_SIZE):
             Tile((x, HEIGHT - 180), TILE_SIZE, [self.all_sprites, self.collision_sprites])
         
         for x in range(500, 700, TILE_SIZE):
             Tile((x, HEIGHT - 260), TILE_SIZE, [self.all_sprites, self.collision_sprites])
         
-        # Create some hazards
+        # Middle section
+        for x in range(WIDTH + 100, WIDTH + 300, TILE_SIZE):
+            Tile((x, HEIGHT - 200), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+        
+        for x in range(WIDTH + 400, WIDTH + 700, TILE_SIZE):
+            Tile((x, HEIGHT - 300), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+        
+        # Final section
+        for x in range(WIDTH * 2, WIDTH * 2 + 300, TILE_SIZE):
+            Tile((x, HEIGHT - 220), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+        
+        for x in range(WIDTH * 2 + 400, WIDTH * 2 + 800, TILE_SIZE):
+            Tile((x, HEIGHT - 350), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+        
+        # Create hazards throughout the level
         Hazard((300, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
         Hazard((600, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
+        Hazard((WIDTH + 200, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
+        Hazard((WIDTH + 500, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
+        Hazard((WIDTH * 2 + 300, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
         
-        # Create some enemies
+        # Create enemies throughout the level
         Enemy((400, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
         Enemy((800, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
+        Enemy((WIDTH + 300, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
+        Enemy((WIDTH + 600, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'flying')
+        Enemy((WIDTH * 2 + 200, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
+        Enemy((WIDTH * 2 + 500, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'jumping')
+        Enemy((WIDTH * 2 + 700, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
         
-        # Create some power-ups
+        # Create power-ups throughout the level
         PowerUp((250, HEIGHT - 250), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed')
         PowerUp((550, HEIGHT - 350), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility')
-        PowerUp((700, HEIGHT - 250), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life')
+        PowerUp((WIDTH + 150, HEIGHT - 300), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life')
+        PowerUp((WIDTH + 650, HEIGHT - 400), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility')
+        PowerUp((WIDTH * 2 + 350, HEIGHT - 320), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed')
+        PowerUp((WIDTH * 2 + 700, HEIGHT - 450), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life')
         
-        # Create finish flag
-        FinishFlag((WIDTH - 100, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.finish_sprites])
+        # Create finish flag at the end of the extended level
+        FinishFlag((WIDTH * 3 - 100, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.finish_sprites])
         
         # Create player - fixed the argument order to match Player.__init__
         self.player = Player(100, HEIGHT - 200, [self.all_sprites], self.collision_sprites)
@@ -157,7 +194,10 @@ class Level:
     def update(self, elapsed_time):
         """Update all level elements"""
         if not self.active:
+            print("Level not active, skipping update")
             return
+        
+        print(f"Updating level at time {elapsed_time}")
         
         # Update player
         self.player.update(elapsed_time)
@@ -192,7 +232,14 @@ class Level:
         # Check enemy collisions
         for enemy in self.enemy_sprites:
             if self.player.rect.colliderect(enemy.rect):
-                if self.player.invincible:
+                # Check if player is stomping the enemy from above
+                if self.player.rect.bottom < enemy.rect.centery and self.player.direction.y > 0:
+                    # Player is stomping the enemy
+                    enemy.kill()
+                    # Give player a small bounce
+                    self.player.direction.y = -10
+                    print("Enemy stomped!")
+                elif self.player.invincible:
                     # If player is invincible, defeat the enemy
                     enemy.kill()
                     print("Enemy defeated with invincibility!")
@@ -224,12 +271,18 @@ class Level:
                 if powerup.type == 'speed':
                     self.player.activate_speed_boost(powerup.duration)
                     print("Speed boost activated!")
+                    # Show notification on UI
+                    self.ui.show_powerup_notification("Speed Boost")
                 elif powerup.type == 'invincibility':
                     self.player.activate_invincibility(powerup.duration)
                     print("Invincibility activated!")
+                    # Show notification on UI
+                    self.ui.show_powerup_notification("Invincibility")
                 elif powerup.type == 'extra_life':
                     self.player.lives += 1
                     print("Extra life collected! Lives:", self.player.lives)
+                    # Show notification on UI
+                    self.ui.show_powerup_notification("Extra Life")
                 
                 # Remove powerup
                 powerup.kill()
@@ -248,6 +301,7 @@ class Level:
     def start(self):
         """Start the level"""
         self.active = True
+        print("Level started - active state set to True")
     
     def reset(self):
         """Reset the level"""

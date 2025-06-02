@@ -4,6 +4,7 @@ Handles game menus and HUD elements.
 """
 import pygame
 import pygame_menu
+import math  # Add math module import at the top level
 from src.settings import *
 
 class UI:
@@ -24,6 +25,11 @@ class UI:
         self.current_time = 0
         self.paused_time = 0
         self.is_timer_running = False
+        
+        # Powerup notification
+        self.powerup_message = ""
+        self.powerup_display_time = 0
+        self.powerup_duration = 3000  # Display for 3 seconds
     
     def create_main_menu(self):
         """Create the main menu"""
@@ -32,85 +38,116 @@ class UI:
         theme.title_font_size = 60
         theme.title_background_color = (0, 0, 100)
         theme.background_color = (0, 0, 50, 200)
+        theme.widget_font_color = (255, 255, 255)
+        theme.widget_alignment = pygame_menu.locals.ALIGN_CENTER
         
         self.main_menu = pygame_menu.Menu(
             'SpeedRunner X', 
             WIDTH, HEIGHT,
             theme=theme,
             mouse_enabled=True,
-            keyboard_enabled=True
+            keyboard_enabled=True,
+            onclose=pygame_menu.events.CLOSE
         )
         
-        # Add a decorative header
-        self.main_menu.add.label('Welcome to the Game!', font_size=40)
-        self.main_menu.add.vertical_margin(30)
+        # Add a decorative header with game logo
+        self.main_menu.add.label('SPEEDRUNNER X', font_size=70, font_color=(255, 215, 0))
+        self.main_menu.add.label('The Ultimate Platform Adventure', font_size=30, font_color=(173, 216, 230))
+        self.main_menu.add.vertical_margin(40)
         
-        # Add menu buttons
-        self.main_menu.add.button('Start Game', self.start_game)
-        self.main_menu.add.button('Leaderboard', self.show_leaderboard)
-        self.main_menu.add.vertical_margin(20)
-        self.main_menu.add.button('Exit', pygame_menu.events.EXIT)
+        # Add menu buttons with improved styling
+        button_theme = theme.copy()
+        button_theme.widget_font_color = (255, 255, 0)
+        
+        self.main_menu.add.button('START GAME', self.start_game, font_size=40)
+        self.main_menu.add.vertical_margin(10)
+        self.main_menu.add.button('LEADERBOARD', self.show_leaderboard, font_size=40)
+        self.main_menu.add.vertical_margin(10)
+        self.main_menu.add.button('EXIT', pygame_menu.events.EXIT, font_size=40)
+        
+        # Add game instructions
+        self.main_menu.add.vertical_margin(40)
+        self.main_menu.add.label('HOW TO PLAY', font_size=30, font_color=(255, 165, 0))
+        self.main_menu.add.label('Arrow Keys / WASD: Move', font_size=24)
+        self.main_menu.add.label('Space: Jump', font_size=24)
+        self.main_menu.add.label('Jump on enemies to defeat them!', font_size=24)
     
     def create_pause_menu(self):
         """Create the pause menu"""
         theme = pygame_menu.themes.THEME_DARK.copy()
         theme.widget_font_size = 32
+        theme.title_font_size = 40
+        theme.title_background_color = (0, 0, 100)
+        theme.background_color = (0, 0, 50, 200)
+        theme.widget_font_color = (255, 255, 255)
         
         self.pause_menu = pygame_menu.Menu(
-            'Paused', 
+            'GAME PAUSED', 
             WIDTH//2, HEIGHT//2,
             theme=theme,
             mouse_enabled=True,
-            keyboard_enabled=True
+            keyboard_enabled=True,
+            onclose=pygame_menu.events.CLOSE
         )
         
-        self.pause_menu.add.button('Resume', self.resume_game)
-        self.pause_menu.add.button('Restart Level', self.restart_level)
-        self.pause_menu.add.button('Quit to Menu', self.quit_to_menu)
+        self.pause_menu.add.vertical_margin(20)
+        self.pause_menu.add.button('RESUME', self.resume_game, font_size=36)
+        self.pause_menu.add.vertical_margin(10)
+        self.pause_menu.add.button('RESTART LEVEL', self.restart_level, font_size=36)
+        self.pause_menu.add.vertical_margin(10)
+        self.pause_menu.add.button('QUIT TO MENU', self.quit_to_menu, font_size=36)
     
     def create_game_over_menu(self):
         """Create the game over menu"""
         theme = pygame_menu.themes.THEME_DARK.copy()
         theme.widget_font_size = 32
-        theme.title_font_size = 40
+        theme.title_font_size = 50
         theme.title_background_color = (150, 0, 0)  # Dark red
         theme.background_color = (50, 0, 0, 200)  # Semi-transparent dark red
+        theme.widget_font_color = (255, 255, 255)
         
         self.game_over_menu = pygame_menu.Menu(
-            'Game Over', 
+            'GAME OVER', 
             WIDTH//2, HEIGHT//2,
             theme=theme,
             mouse_enabled=True,
-            keyboard_enabled=True
+            keyboard_enabled=True,
+            onclose=pygame_menu.events.CLOSE
         )
         
-        self.game_over_menu.add.label('You lost all your lives!')
-        self.game_over_menu.add.vertical_margin(20)  # Add some space
-        self.game_over_menu.add.button('Retry Level', self.restart_level)
-        self.game_over_menu.add.button('Quit to Menu', self.quit_to_menu)
+        self.game_over_menu.add.label('You lost all your lives!', font_size=36, font_color=(255, 100, 100))
+        self.game_over_menu.add.vertical_margin(30)
+        self.game_over_menu.add.button('RETRY LEVEL', self.restart_level, font_size=36)
+        self.game_over_menu.add.vertical_margin(10)
+        self.game_over_menu.add.button('QUIT TO MENU', self.quit_to_menu, font_size=36)
     
     def create_victory_menu(self):
         """Create the victory menu"""
         theme = pygame_menu.themes.THEME_DARK.copy()
         theme.widget_font_size = 32
-        theme.title_font_size = 40
+        theme.title_font_size = 50
         theme.title_background_color = (0, 100, 0)  # Dark green
         theme.background_color = (20, 50, 20, 200)  # Semi-transparent dark green
+        theme.widget_font_color = (255, 255, 255)
         
         self.victory_menu = pygame_menu.Menu(
-            'Level Complete!', 
+            'LEVEL COMPLETE!', 
             WIDTH//2, HEIGHT//2,
             theme=theme,
             mouse_enabled=True,
-            keyboard_enabled=True
+            keyboard_enabled=True,
+            onclose=pygame_menu.events.CLOSE
         )
         
-        self.victory_time_label = self.victory_menu.add.label('Your Time: 00:00.000')
-        self.victory_best_label = self.victory_menu.add.label('Best Time: 00:00.000')
-        self.victory_menu.add.vertical_margin(20)  # Add some space
-        self.victory_menu.add.button('Next Level', self.next_level)
-        self.victory_menu.add.button('Retry Level', self.restart_level)
-        self.victory_menu.add.button('Quit to Menu', self.quit_to_menu)
+        self.victory_menu.add.vertical_margin(10)
+        self.victory_time_label = self.victory_menu.add.label('Your Time: 00:00.000', font_size=36, font_color=(255, 255, 0))
+        self.victory_best_label = self.victory_menu.add.label('Best Time: 00:00.000', font_size=36, font_color=(255, 215, 0))
+        self.victory_menu.add.vertical_margin(30)
+        self.victory_menu.add.button('NEXT LEVEL', self.next_level, font_size=36)
+        self.victory_menu.add.vertical_margin(10)
+        self.victory_menu.add.button('RETRY LEVEL', self.restart_level, font_size=36)
+        self.victory_menu.add.vertical_margin(10)
+        self.victory_menu.add.button('QUIT TO MENU', self.quit_to_menu, font_size=36)
     
     # Menu callback placeholders - these will be overridden by the game class
     def start_game(self):
@@ -137,21 +174,85 @@ class UI:
         print("Next level button pressed!")  # Debug print
         pass
     
+    def show_powerup_notification(self, powerup_type):
+        """Display a notification when player collects a powerup"""
+        self.powerup_message = powerup_type.upper() + " ACTIVATED!"
+        self.powerup_display_time = pygame.time.get_ticks()
+    
     def draw_hud(self, lives, current_level):
         """Draw the HUD (heads-up display)"""
-        # Draw lives
-        lives_text = self.font_medium.render(f"Lives: {lives}", True, WHITE)
+        # Create a semi-transparent HUD background
+        hud_surface = pygame.Surface((WIDTH, 100), pygame.SRCALPHA)
+        hud_surface.fill((0, 0, 0, 128))  # Semi-transparent black
+        self.screen.blit(hud_surface, (0, 0))
+        
+        # Draw lives with heart icons
+        lives_text = self.font_medium.render("Lives:", True, WHITE)
         self.screen.blit(lives_text, (20, 20))
         
-        # Draw level
-        level_text = self.font_medium.render(f"Level: {current_level}", True, WHITE)
-        self.screen.blit(level_text, (20, 60))
+        for i in range(lives):
+            # Draw a heart
+            heart_pos = (lives_text.get_width() + 40 + i * 40, 20)
+            self.draw_heart(heart_pos)
         
-        # Draw timer if running
+        # Draw level with a fancy border
+        level_text = self.font_medium.render(f"Level {current_level}", True, YELLOW)
+        level_rect = level_text.get_rect(center=(WIDTH // 2, 30))
+        
+        # Draw border
+        border_rect = level_rect.inflate(20, 10)
+        pygame.draw.rect(self.screen, BLUE, border_rect, border_radius=5)
+        pygame.draw.rect(self.screen, LIGHT_BLUE, border_rect, 2, border_radius=5)
+        
+        # Draw level text
+        self.screen.blit(level_text, level_rect)
+        
+        # Draw timer with a fancy display
         if self.is_timer_running:
             self.current_time = pygame.time.get_ticks() - self.timer_start - self.paused_time
             timer_text = self.font_medium.render(f"Time: {self.format_time(self.current_time)}", True, WHITE)
-            self.screen.blit(timer_text, (WIDTH - timer_text.get_width() - 20, 20))
+            timer_rect = timer_text.get_rect(topright=(WIDTH - 20, 20))
+            self.screen.blit(timer_text, timer_rect)
+        
+        # Draw powerup notification if active
+        current_time = pygame.time.get_ticks()
+        if current_time - self.powerup_display_time < self.powerup_duration:
+            # Calculate alpha for fade effect
+            alpha = 255
+            if current_time - self.powerup_display_time > self.powerup_duration - 1000:
+                # Fade out in the last second
+                alpha = 255 * (1 - (current_time - self.powerup_display_time - (self.powerup_duration - 1000)) / 1000)
+            
+            # Create notification text with pulsing effect
+            pulse = 0.1 * abs(math.sin((current_time - self.powerup_display_time) / 100))
+            size = int(40 + pulse * 10)
+            powerup_font = pygame.font.Font(None, size)
+            
+            powerup_text = powerup_font.render(self.powerup_message, True, (255, 255, 0))
+            powerup_text.set_alpha(int(alpha))
+            
+            # Position at center of screen
+            text_rect = powerup_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
+            self.screen.blit(powerup_text, text_rect)
+    
+    def draw_heart(self, pos):
+        """Draw a heart icon for lives"""
+        x, y = pos
+        size = 24
+        
+        # Draw a simple heart shape
+        heart_color = (255, 0, 0)  # Red
+        
+        # Draw the two circles for the top of the heart
+        pygame.draw.circle(self.screen, heart_color, (x + size//4, y + size//4), size//4)
+        pygame.draw.circle(self.screen, heart_color, (x + size - size//4, y + size//4), size//4)
+        
+        # Draw the triangle for the bottom of the heart
+        pygame.draw.polygon(self.screen, heart_color, [
+            (x, y + size//4),
+            (x + size//2, y + size),
+            (x + size, y + size//4)
+        ])
     
     def start_timer(self):
         """Start the game timer"""
@@ -205,50 +306,29 @@ class UI:
         
     def draw_countdown(self, count):
         """Draw countdown before level starts"""
+        # Create a fancy countdown display
         count_text = self.font_large.render(str(count), True, WHITE)
-        self.screen.blit(count_text, (WIDTH/2 - count_text.get_width()/2, HEIGHT/2 - count_text.get_height()/2))
-    
-    def get_elapsed_time(self):
-        """Get the elapsed time in milliseconds"""
-        if self.is_timer_running:
-            return pygame.time.get_ticks() - self.timer_start - self.paused_time
-        return self.current_time
-    
-    def format_time(self, time_ms):
-        """Format time in milliseconds to MM:SS.ms format"""
-        minutes = int(time_ms / 60000)
-        seconds = int((time_ms % 60000) / 1000)
-        milliseconds = time_ms % 1000
-        return f"{minutes:02d}:{seconds:02d}.{milliseconds:03d}"
-    
-    def update_victory_menu(self, current_time, best_time):
-        """Update the victory menu with current and best times"""
-        self.victory_time_label.set_title(f'Your Time: {self.format_time(current_time)}')
+        count_size = max(100, 150 - (pygame.time.get_ticks() % 1000) // 10)  # Pulsing effect
         
-        if best_time:
-            self.victory_best_label.set_title(f'Best Time: {self.format_time(best_time)}')
-        else:
-            self.victory_best_label.set_title('Best Time: N/A')
-    
-    def draw_hud(self, player_lives, current_level):
-        """Draw the in-game HUD"""
-        # Draw timer
-        time_text = self.font_medium.render(
-            f"Time: {self.format_time(self.get_elapsed_time())}", 
-            True, WHITE
-        )
-        self.screen.blit(time_text, (20, 20))
+        # Create a larger font for the countdown
+        count_font = pygame.font.Font(None, count_size)
+        count_text = count_font.render(str(count), True, YELLOW)
         
-        # Draw lives
-        lives_text = self.font_medium.render(f"Lives: {player_lives}", True, WHITE)
-        self.screen.blit(lives_text, (20, 60))
+        # Add a shadow effect
+        shadow_text = count_font.render(str(count), True, RED)
+        shadow_rect = shadow_text.get_rect(center=(WIDTH/2 + 4, HEIGHT/2 + 4))
         
-        # Draw current level
-        level_text = self.font_medium.render(f"Level: {current_level}", True, WHITE)
-        self.screen.blit(level_text, (WIDTH - level_text.get_width() - 20, 20))
-    
-    def draw_countdown(self, count):
-        """Draw countdown before level starts"""
-        count_text = self.font_large.render(str(count), True, WHITE)
+        # Add a circle background
+        circle_radius = count_text.get_width() + 20
+        pygame.draw.circle(self.screen, (0, 0, 100, 150), (WIDTH/2, HEIGHT/2), circle_radius)
+        pygame.draw.circle(self.screen, (0, 0, 200, 150), (WIDTH/2, HEIGHT/2), circle_radius - 5)
+        
+        # Draw the shadow and text
+        self.screen.blit(shadow_text, shadow_rect)
         count_rect = count_text.get_rect(center=(WIDTH/2, HEIGHT/2))
         self.screen.blit(count_text, count_rect)
+        
+        # Add "Get Ready!" text
+        ready_text = self.font_medium.render("Get Ready!", True, WHITE)
+        ready_rect = ready_text.get_rect(center=(WIDTH/2, HEIGHT/2 + circle_radius + 20))
+        self.screen.blit(ready_text, ready_rect)

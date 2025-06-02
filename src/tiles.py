@@ -45,6 +45,22 @@ class Tile(pygame.sprite.Sprite):
                 x = pygame.time.get_ticks() % size
                 y = pygame.time.get_ticks() % (size // 4)
                 pygame.draw.rect(self.image, (45, 160, 45), (x, y, 2, 2))
+                
+        elif tile_type == 'dirt':
+            # Create a dirt block
+            DIRT_COLOR = (139, 69, 19)  # Brown
+            DARK_DIRT = (101, 67, 33)  # Darker brown
+            
+            # Fill with dirt color
+            self.image.fill(DIRT_COLOR)
+            
+            # Add some texture/variation
+            for i in range(5):
+                x = (pygame.time.get_ticks() + i * 50) % size
+                y = (pygame.time.get_ticks() + i * 30) % size
+                width = 4 + i % 4
+                height = 4 + i % 3
+                pygame.draw.rect(self.image, DARK_DIRT, (x, y, width, height))
         
         self.rect = self.image.get_rect(topleft=pos)
 
