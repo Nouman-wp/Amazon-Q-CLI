@@ -128,6 +128,7 @@ class Level:
         # Create some power-ups
         PowerUp((250, HEIGHT - 250), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed')
         PowerUp((550, HEIGHT - 350), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility')
+        PowerUp((700, HEIGHT - 250), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life')
         
         # Create finish flag
         FinishFlag((WIDTH - 100, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.finish_sprites])
@@ -191,31 +192,44 @@ class Level:
         # Check enemy collisions
         for enemy in self.enemy_sprites:
             if self.player.rect.colliderect(enemy.rect):
-                # Player takes damage
-                self.player.lives -= 1
-                # Reset player position
-                self.player.rect.x = 100
-                self.player.rect.y = HEIGHT - 200
+                if self.player.invincible:
+                    # If player is invincible, defeat the enemy
+                    enemy.kill()
+                    print("Enemy defeated with invincibility!")
+                else:
+                    # Player takes damage
+                    self.player.lives -= 1
+                    print(f"Player hit by enemy! Lives left: {self.player.lives}")
+                    # Reset player position
+                    self.player.rect.x = 100
+                    self.player.rect.y = HEIGHT - 200
                 break
         
         # Check hazard collisions
         for hazard in self.hazard_sprites:
             if self.player.rect.colliderect(hazard.rect):
-                # Player takes damage
-                self.player.lives -= 1
-                # Reset player position
-                self.player.rect.x = 100
-                self.player.rect.y = HEIGHT - 200
+                if not self.player.invincible:
+                    # Player takes damage
+                    self.player.lives -= 1
+                    print(f"Player hit by hazard! Lives left: {self.player.lives}")
+                    # Reset player position
+                    self.player.rect.x = 100
+                    self.player.rect.y = HEIGHT - 200
                 break
         
         # Check powerup collisions
         for powerup in list(self.powerup_sprites):
             if self.player.rect.colliderect(powerup.rect):
                 # Apply powerup effect
-                if powerup.powerup_type == 'speed':
-                    self.player.speed *= 1.5
-                elif powerup.powerup_type == 'invincibility':
-                    pass  # Implement invincibility
+                if powerup.type == 'speed':
+                    self.player.activate_speed_boost(powerup.duration)
+                    print("Speed boost activated!")
+                elif powerup.type == 'invincibility':
+                    self.player.activate_invincibility(powerup.duration)
+                    print("Invincibility activated!")
+                elif powerup.type == 'extra_life':
+                    self.player.lives += 1
+                    print("Extra life collected! Lives:", self.player.lives)
                 
                 # Remove powerup
                 powerup.kill()

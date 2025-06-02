@@ -4,6 +4,7 @@ Handles player movement, physics, and interactions.
 """
 import pygame
 import os
+import time
 from src.settings import *
 
 class Player(pygame.sprite.Sprite):
@@ -28,6 +29,7 @@ class Player(pygame.sprite.Sprite):
         # Movement
         self.direction = pygame.math.Vector2(0, 0)
         self.speed = PLAYER_SPEED
+        self.base_speed = PLAYER_SPEED  # Store original speed for powerups
         self.gravity = PLAYER_GRAVITY
         self.jump_strength = PLAYER_JUMP_STRENGTH
         self.friction = PLAYER_FRICTION
@@ -40,6 +42,14 @@ class Player(pygame.sprite.Sprite):
         self.is_falling = False
         self.is_running = False
         self.lives = PLAYER_START_LIVES
+        
+        # Powerup effects
+        self.speed_boost_active = False
+        self.speed_boost_end_time = 0
+        self.invincible = False
+        self.invincible_end_time = 0
+        self.invincible_flash = False
+        self.flash_timer = 0
         
         # Position history for ghost replay
         self.position_history = []
@@ -252,6 +262,9 @@ class Player(pygame.sprite.Sprite):
     
     def animate(self):
         """Update player animation based on state"""
+        # Store the original image for invincibility effect
+        original_image = None
+        
         # Determine which animation to use
         if self.direction.y < 0:  # Jumping
             self.is_jumping = True
@@ -259,18 +272,18 @@ class Player(pygame.sprite.Sprite):
             self.is_running = False
             
             if self.facing_right:
-                self.image = self.jump_frame_right
+                original_image = self.jump_frame_right
             else:
-                self.image = self.jump_frame_left
+                original_image = self.jump_frame_left
         elif self.direction.y > 1:  # Falling (with a small threshold)
             self.is_jumping = False
             self.is_falling = True
             self.is_running = False
             
             if self.facing_right:
-                self.image = self.fall_frame_right
+                original_image = self.fall_frame_right
             else:
-                self.image = self.fall_frame_left
+                original_image = self.fall_frame_left
         elif abs(self.direction.x) > 0.1:  # Running
             self.is_jumping = False
             self.is_falling = False
@@ -283,9 +296,9 @@ class Player(pygame.sprite.Sprite):
                 
             # Set correct animation based on direction
             if self.facing_right:
-                self.image = self.run_frames_right[int(self.frame_index)]
+                original_image = self.run_frames_right[int(self.frame_index)]
             else:
-                self.image = self.run_frames_left[int(self.frame_index)]
+                original_image = self.run_frames_left[int(self.frame_index)]
         else:  # Idle
             self.is_jumping = False
             self.is_falling = False
@@ -298,14 +311,26 @@ class Player(pygame.sprite.Sprite):
                 
             # Set correct animation based on direction
             if self.facing_right:
-                self.image = self.idle_frames_right[int(self.frame_index)]
+                original_image = self.idle_frames_right[int(self.frame_index)]
             else:
-                self.image = self.idle_frames_left[int(self.frame_index)]
+                original_image = self.idle_frames_left[int(self.frame_index)]
+        
+        # Apply invincibility effect (flashing)
+        if self.invincible and self.invincible_flash:
+            # Create a white silhouette for flashing effect
+            white_image = original_image.copy()
+            white_image.fill((255, 255, 255, 180), None, pygame.BLEND_RGBA_MULT)
+            self.image = white_image
+        else:
+            self.image = original_image
     
     def update(self, elapsed_time=0):
         """Update player state"""
         # Get input
         self.get_input()
+        
+        # Check powerup timers
+        self.update_powerups()
         
         # Apply physics
         self.apply_physics()
@@ -320,6 +345,40 @@ class Player(pygame.sprite.Sprite):
         if elapsed_time - self.last_record_time > 50:
             self.record_position(elapsed_time)
             self.last_record_time = elapsed_time
+    
+    def update_powerups(self):
+        """Update powerup effects"""
+        current_time = pygame.time.get_ticks()
+        
+        # Check speed boost
+        if self.speed_boost_active and current_time >= self.speed_boost_end_time:
+            self.speed_boost_active = False
+            self.speed = self.base_speed
+            print("Speed boost ended")
+        
+        # Check invincibility
+        if self.invincible and current_time >= self.invincible_end_time:
+            self.invincible = False
+            print("Invincibility ended")
+        
+        # Flash effect for invincibility
+        if self.invincible:
+            if current_time - self.flash_timer > 100:  # Flash every 100ms
+                self.invincible_flash = not self.invincible_flash
+                self.flash_timer = current_time
+    
+    def activate_speed_boost(self, duration=SPEED_BOOST_DURATION):
+        """Activate speed boost powerup"""
+        self.base_speed = PLAYER_SPEED  # Store current base speed
+        self.speed = self.base_speed * SPEED_BOOST_MULTIPLIER
+        self.speed_boost_active = True
+        self.speed_boost_end_time = pygame.time.get_ticks() + duration
+    
+    def activate_invincibility(self, duration=INVINCIBILITY_DURATION):
+        """Activate invincibility powerup"""
+        self.invincible = True
+        self.invincible_end_time = pygame.time.get_ticks() + duration
+        self.flash_timer = pygame.time.get_ticks()
     
     def record_position(self, time):
         """Record current position for ghost replay"""
