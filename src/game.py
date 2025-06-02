@@ -141,17 +141,23 @@ class Game:
                     final_time = self.ui.get_elapsed_time()
                     level_name = f"level{self.current_level}"
                     
-                    if self.leaderboard.is_new_record(level_name, final_time):
-                        ghost_data = self.level.get_player_position_history()
-                        self.level.ghost.save_ghost_data(level_name, ghost_data)
-                    
-                    # Add time to leaderboard
-                    self.leaderboard.add_time(level_name, final_time)
-                    
-                    # Show victory menu
-                    best_time = self.leaderboard.get_best_time(level_name)
-                    self.ui.update_victory_menu(final_time, best_time)
-                    self.state = STATE_VICTORY
+                    try:
+                        if self.leaderboard.is_new_record(level_name, final_time):
+                            ghost_data = self.level.get_player_position_history()
+                            self.level.ghost.save_ghost_data(level_name, ghost_data)
+                        
+                        # Add time to leaderboard
+                        self.leaderboard.add_time(level_name, final_time)
+                        
+                        # Show victory menu
+                        best_time = self.leaderboard.get_best_time(level_name)
+                        self.ui.update_victory_menu(final_time, best_time)
+                        self.state = STATE_VICTORY
+                    except Exception as e:
+                        print(f"Error handling level completion: {e}")
+                        # Fallback to just showing victory menu
+                        self.ui.update_victory_menu(final_time, None)
+                        self.state = STATE_VICTORY
                 
                 # Check if player is dead
                 if self.level.player.lives <= 0:
@@ -202,11 +208,11 @@ class Game:
                     elif event.key == pygame.K_UP:
                         print("UP key pressed in main menu")
                         # Move selection up (previous widget)
-                        self.ui.main_menu.move_index(-1)
+                        self.ui.main_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_UP)])
                     elif event.key == pygame.K_DOWN:
                         print("DOWN key pressed in main menu")
                         # Move selection down (next widget)
-                        self.ui.main_menu.move_index(1)
+                        self.ui.main_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN)])
         
         elif self.state == STATE_PLAYING:
             # Draw level
@@ -257,11 +263,11 @@ class Game:
                     elif event.key == pygame.K_UP:
                         print("UP key pressed in pause menu")
                         # Move selection up (previous widget)
-                        self.ui.pause_menu.move_index(-1)
+                        self.ui.pause_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_UP)])
                     elif event.key == pygame.K_DOWN:
                         print("DOWN key pressed in pause menu")
                         # Move selection down (next widget)
-                        self.ui.pause_menu.move_index(1)
+                        self.ui.pause_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN)])
         
         elif self.state == STATE_GAME_OVER:
             # Fill with dark background
@@ -299,11 +305,11 @@ class Game:
                     elif event.key == pygame.K_UP:
                         print("UP key pressed in game over menu")
                         # Move selection up (previous widget)
-                        self.ui.game_over_menu.move_index(-1)
+                        self.ui.game_over_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_UP)])
                     elif event.key == pygame.K_DOWN:
                         print("DOWN key pressed in game over menu")
                         # Move selection down (next widget)
-                        self.ui.game_over_menu.move_index(1)
+                        self.ui.game_over_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN)])
         
         elif self.state == STATE_VICTORY:
             # Fill with victory background
@@ -342,11 +348,11 @@ class Game:
                     elif event.key == pygame.K_UP:
                         print("UP key pressed in victory menu")
                         # Move selection up (previous widget)
-                        self.ui.victory_menu.move_index(-1)
+                        self.ui.victory_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_UP)])
                     elif event.key == pygame.K_DOWN:
                         print("DOWN key pressed in victory menu")
                         # Move selection down (next widget)
-                        self.ui.victory_menu.move_index(1)
+                        self.ui.victory_menu.update([pygame.event.Event(pygame.KEYDOWN, key=pygame.K_DOWN)])
         
         elif self.state == STATE_LEADERBOARD:
             # Draw leaderboard

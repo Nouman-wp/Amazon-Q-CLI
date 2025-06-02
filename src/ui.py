@@ -179,6 +179,20 @@ class UI:
         milliseconds = milliseconds % 1000
         return f"{minutes:02d}:{seconds:02d}.{milliseconds:03d}"
     
+    def get_elapsed_time(self):
+        """Get the elapsed time in milliseconds"""
+        if self.is_timer_running:
+            return pygame.time.get_ticks() - self.timer_start - self.paused_time
+        else:
+            return self.current_time
+    
+    def reset_timer(self):
+        """Reset the game timer"""
+        self.timer_start = pygame.time.get_ticks()
+        self.is_timer_running = True
+        self.paused_time = 0
+        self.current_time = 0
+    
     def update_victory_menu(self, current_time, best_time):
         """Update the victory menu with current and best times"""
         # Format times

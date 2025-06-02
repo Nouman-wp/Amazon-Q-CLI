@@ -178,15 +178,48 @@ class Level:
                 sprite.update()
         
         # Check collisions
-        self.player.check_enemy_collisions(self.enemy_sprites)
-        self.player.check_hazard_collisions(self.hazard_sprites)
-        self.player.check_powerup_collisions(self.powerup_sprites)
+        self.check_collisions()
         
         # Check level completion
         self.check_level_complete()
         
         # Update camera
         self.update_camera()
+    
+    def check_collisions(self):
+        """Check all collisions"""
+        # Check enemy collisions
+        for enemy in self.enemy_sprites:
+            if self.player.rect.colliderect(enemy.rect):
+                # Player takes damage
+                self.player.lives -= 1
+                # Reset player position
+                self.player.rect.x = 100
+                self.player.rect.y = HEIGHT - 200
+                break
+        
+        # Check hazard collisions
+        for hazard in self.hazard_sprites:
+            if self.player.rect.colliderect(hazard.rect):
+                # Player takes damage
+                self.player.lives -= 1
+                # Reset player position
+                self.player.rect.x = 100
+                self.player.rect.y = HEIGHT - 200
+                break
+        
+        # Check powerup collisions
+        for powerup in list(self.powerup_sprites):
+            if self.player.rect.colliderect(powerup.rect):
+                # Apply powerup effect
+                if powerup.powerup_type == 'speed':
+                    self.player.speed *= 1.5
+                elif powerup.powerup_type == 'invincibility':
+                    pass  # Implement invincibility
+                
+                # Remove powerup
+                powerup.kill()
+                break
     
     def draw(self):
         """Draw all level elements with camera offset"""
@@ -227,6 +260,12 @@ class Level:
         self.ghost.load_ghost_data(self.level_name)
         
         print("Level reset complete")
+    
+    def get_player_position_history(self):
+        """Get the player's position history for ghost replay"""
+        if self.player:
+            return self.player.position_history
+        return []
     
     def get_player_position_history(self):
         """Get the player's position history for ghost replay"""
