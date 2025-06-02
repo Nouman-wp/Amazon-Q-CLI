@@ -3,6 +3,7 @@ Tiles module for SpeedRunner X.
 Handles game tiles, platforms, and hazards.
 """
 import pygame
+import math
 from src.settings import *
 
 class Tile(pygame.sprite.Sprite):
@@ -61,8 +62,125 @@ class Tile(pygame.sprite.Sprite):
                 width = 4 + i % 4
                 height = 4 + i % 3
                 pygame.draw.rect(self.image, DARK_DIRT, (x, y, width, height))
+                
+        elif tile_type == 'invisible':
+            # Create an invisible collision tile
+            self.image.fill((0, 0, 0, 0))  # Completely transparent
         
         self.rect = self.image.get_rect(topleft=pos)
+
+
+class Hazard(pygame.sprite.Sprite):
+    def __init__(self, pos, size, groups, hazard_type='spike'):
+        super().__init__(groups)
+        
+        self.image = pygame.Surface((size, size), pygame.SRCALPHA)
+        
+        if hazard_type == 'spike':
+            # Draw spikes
+            SPIKE_COLOR = (200, 200, 200)  # Silver
+            
+            # Draw multiple triangular spikes
+            spike_count = 4
+            spike_width = size // spike_count
+            
+            for i in range(spike_count):
+                x_start = i * spike_width
+                points = [
+                    (x_start, size),
+                    (x_start + spike_width // 2, 0),
+                    (x_start + spike_width, size)
+                ]
+                pygame.draw.polygon(self.image, SPIKE_COLOR, points)
+                pygame.draw.polygon(self.image, (100, 100, 100), points, 1)
+        
+        elif hazard_type == 'lava':
+            # Draw lava
+            LAVA_COLOR = (255, 69, 0)  # Orange-red
+            
+            # Fill base
+            pygame.draw.rect(self.image, LAVA_COLOR, (0, size // 2, size, size // 2))
+            
+            # Draw lava bubbles
+            for i in range(3):
+                x = (pygame.time.get_ticks() // 100 + i * 50) % size
+                radius = 3 + i % 3
+                pygame.draw.circle(self.image, (255, 200, 0), (x, size // 2), radius)
+            
+            # Draw lava surface waves
+            wave_height = 4
+            for x in range(0, size, 4):
+                offset = int(math.sin((pygame.time.get_ticks() / 500 + x / 10) % (2 * math.pi)) * wave_height)
+                pygame.draw.line(self.image, (255, 200, 0), (x, size // 2 + offset), (x + 2, size // 2 + offset))
+        
+        self.rect = self.image.get_rect(topleft=pos)
+
+
+class MovingPlatform(Tile):
+    def __init__(self, pos, size, groups, distance=100, speed=2, direction='horizontal'):
+        super().__init__(pos, size, groups)
+        
+        # Movement properties
+        self.start_pos = pygame.math.Vector2(pos)
+        self.direction = direction
+        self.distance = distance
+        self.speed = speed
+        self.pos = pygame.math.Vector2(pos)
+        self.moving_forward = True
+    
+    def update(self):
+        """Update platform position"""
+        if self.direction == 'horizontal':
+            # Move horizontally
+            if self.moving_forward:
+                self.pos.x += self.speed
+                if self.pos.x >= self.start_pos.x + self.distance:
+                    self.moving_forward = False
+            else:
+                self.pos.x -= self.speed
+                if self.pos.x <= self.start_pos.x:
+                    self.moving_forward = True
+        else:
+            # Move vertically
+            if self.moving_forward:
+                self.pos.y += self.speed
+                if self.pos.y >= self.start_pos.y + self.distance:
+                    self.moving_forward = False
+            else:
+                self.pos.y -= self.speed
+                if self.pos.y <= self.start_pos.y:
+                    self.moving_forward = True
+        
+        # Update rect position
+        self.rect.topleft = (round(self.pos.x), round(self.pos.y))
+
+
+class FinishFlag(pygame.sprite.Sprite):
+    def __init__(self, pos, size, groups):
+        super().__init__(groups)
+        
+        # Create a checkered flag
+        self.image = pygame.Surface((size, size), pygame.SRCALPHA)
+        
+        # Draw pole
+        pygame.draw.rect(self.image, (150, 75, 0), (size // 2 - 2, 0, 4, size))
+        
+        # Draw flag
+        flag_width = size // 2
+        flag_height = size // 3
+        
+        # Create checkered pattern
+        check_size = 4
+        for y in range(0, flag_height, check_size):
+            for x in range(0, flag_width, check_size):
+                color = WHITE if (x // check_size + y // check_size) % 2 == 0 else BLACK
+                pygame.draw.rect(self.image, color, (size // 2 - flag_width + x, y, check_size, check_size))
+        
+        self.rect = self.image.get_rect(topleft=pos)
+        
+        # Animation
+        self.wave_offset = 0
+        self.wave_speed = 0.1
 
 class Hazard(pygame.sprite.Sprite):
     def __init__(self, pos, size, groups, hazard_type='spike'):

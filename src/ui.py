@@ -212,6 +212,12 @@ class UI:
             self.current_time = pygame.time.get_ticks() - self.timer_start - self.paused_time
             timer_text = self.font_medium.render(f"Time: {self.format_time(self.current_time)}", True, WHITE)
             timer_rect = timer_text.get_rect(topright=(WIDTH - 20, 20))
+            
+            # Draw timer background
+            timer_bg_rect = timer_rect.inflate(20, 10)
+            pygame.draw.rect(self.screen, (50, 50, 50, 180), timer_bg_rect, border_radius=5)
+            pygame.draw.rect(self.screen, (100, 100, 100), timer_bg_rect, 2, border_radius=5)
+            
             self.screen.blit(timer_text, timer_rect)
         
         # Draw powerup notification if active
@@ -231,9 +237,22 @@ class UI:
             powerup_text = powerup_font.render(self.powerup_message, True, (255, 255, 0))
             powerup_text.set_alpha(int(alpha))
             
-            # Position at center of screen
+            # Create a background for better visibility
             text_rect = powerup_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
+            bg_rect = text_rect.inflate(40, 20)
+            bg_surface = pygame.Surface((bg_rect.width, bg_rect.height), pygame.SRCALPHA)
+            bg_surface.fill((0, 0, 0, int(alpha * 0.7)))
+            
+            # Draw background and text
+            self.screen.blit(bg_surface, bg_rect)
             self.screen.blit(powerup_text, text_rect)
+            
+            # Add a glowing effect
+            glow_size = int(size * 1.1)
+            glow_font = pygame.font.Font(None, glow_size)
+            glow_text = glow_font.render(self.powerup_message, True, (255, 255, 0, int(alpha * 0.3)))
+            glow_rect = glow_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
+            self.screen.blit(glow_text, glow_rect)
     
     def draw_heart(self, pos):
         """Draw a heart icon for lives"""

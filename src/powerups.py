@@ -93,45 +93,27 @@ class PowerUp(pygame.sprite.Sprite):
         self.original_image = self.image.copy()
         self.original_size = self.image.get_size()
         
-        # Physics
-        self.gravity = 0.2
-        self.velocity = pygame.math.Vector2(0, 0)
-        self.on_ground = False
-        self.position = pygame.math.Vector2(pos)
+        # Physics - FIXED: No physics, just static positioning
+        self.on_ground = True  # Always on ground
+        
+        # Force initial collision check to ensure powerups don't fall through platforms
+        if self.collision_sprites:
+            self.check_initial_collision()
     
-    def apply_gravity(self):
-        """Apply gravity to the powerup"""
-        if not self.on_ground:
-            self.velocity.y += self.gravity
-            self.position.y += self.velocity.y
-            self.rect.y = int(self.position.y)
-            
-            # Check for collision with ground
-            if self.collision_sprites:
-                for sprite in self.collision_sprites:
-                    if sprite.rect.colliderect(self.rect):
-                        if self.velocity.y > 0:  # Moving down
-                            self.rect.bottom = sprite.rect.top
-                            self.position.y = self.rect.y
-                            self.velocity.y = 0
-                            self.on_ground = True
-                            self.float_y = float(self.rect.y)
-                            break
+    def check_initial_collision(self):
+        """Check if the powerup is already on a platform when created"""
+        # This is now just a placeholder - powerups are static
+        self.on_ground = True
     
     def update(self):
         """Update powerup animation"""
-        # Apply gravity if we have collision sprites
-        if self.collision_sprites:
-            self.apply_gravity()
+        # Only do floating animation - no gravity or physics
+        # Floating animation
+        self.float_y += self.float_speed * self.float_direction
+        if abs(self.float_y - self.rect.y) >= self.float_distance:
+            self.float_direction *= -1
         
-        # Only do floating animation if on ground
-        if self.on_ground:
-            # Floating animation
-            self.float_y += self.float_speed * self.float_direction
-            if abs(self.float_y - self.rect.y) >= self.float_distance:
-                self.float_direction *= -1
-            
-            self.rect.y = int(self.float_y)
+        self.rect.y = int(self.float_y)
         
         # Pulsing animation
         self.pulse_scale += self.pulse_direction

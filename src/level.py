@@ -112,13 +112,20 @@ class Level:
         # Create a much longer level (3x the screen width)
         level_width = WIDTH * 3
         
+        # Create a solid floor that extends beyond the screen
+        # First create a boundary at the bottom to prevent anything from falling through
+        for x in range(-TILE_SIZE * 10, level_width + TILE_SIZE * 10, TILE_SIZE):
+            # Create invisible boundary at the very bottom
+            boundary = Tile((x, HEIGHT), TILE_SIZE, [self.collision_sprites], 'invisible')
+            boundary.rect.height = TILE_SIZE * 10  # Make it very tall to catch everything
+        
         # Create ground for the entire level - fill the bottom completely
-        for x in range(0, level_width + TILE_SIZE, TILE_SIZE):
+        for x in range(-TILE_SIZE * 10, level_width + TILE_SIZE * 10, TILE_SIZE):
             # Create the top grass layer
             ground_tile = Tile((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.collision_sprites], 'grass')
             
             # Fill in dirt blocks below the grass to prevent void
-            for y in range(HEIGHT, HEIGHT + TILE_SIZE * 3, TILE_SIZE):
+            for y in range(HEIGHT, HEIGHT + TILE_SIZE * 10, TILE_SIZE):
                 Tile((x, y), TILE_SIZE, [self.all_sprites, self.collision_sprites], 'dirt')
         
         # Create platforms throughout the level
@@ -160,12 +167,13 @@ class Level:
         Enemy((WIDTH * 2 + 700, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
         
         # Create power-ups throughout the level with collision detection
-        PowerUp((250, HEIGHT - 250), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
-        PowerUp((550, HEIGHT - 350), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
-        PowerUp((WIDTH + 150, HEIGHT - 300), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
-        PowerUp((WIDTH + 650, HEIGHT - 400), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
-        PowerUp((WIDTH * 2 + 350, HEIGHT - 320), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
-        PowerUp((WIDTH * 2 + 700, HEIGHT - 450), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
+        # Place them directly on platforms to prevent falling
+        PowerUp((250, HEIGHT - 250 - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
+        PowerUp((550, HEIGHT - 350 - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
+        PowerUp((WIDTH + 150, HEIGHT - 300 - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
+        PowerUp((WIDTH + 650, HEIGHT - 400 - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
+        PowerUp((WIDTH * 2 + 350, HEIGHT - 320 - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
+        PowerUp((WIDTH * 2 + 700, HEIGHT - 450 - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
         
         # Create finish flag at the end of the extended level
         FinishFlag((WIDTH * 3 - 100, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.finish_sprites])
@@ -194,10 +202,10 @@ class Level:
     def update(self, elapsed_time):
         """Update all level elements"""
         if not self.active:
-            print("Level not active, skipping update")
+            # Removed debug print to improve performance
             return
         
-        print(f"Updating level at time {elapsed_time}")
+        # Removed debug print to improve performance
         
         # Update player
         self.player.update(elapsed_time)
@@ -290,13 +298,28 @@ class Level:
     
     def draw(self):
         """Draw all level elements with camera offset"""
-        # Fill background
-        self.display_surface.fill(BLACK)
+        # Fill background with a gradient sky
+        self.draw_background()
         
         # Draw all sprites with camera offset
         for sprite in self.all_sprites:
             offset_pos = sprite.rect.topleft + self.camera_offset
             self.display_surface.blit(sprite.image, offset_pos)
+    
+    def draw_background(self):
+        """Draw a gradient background"""
+        # Create a gradient from blue to light blue
+        height = self.display_surface.get_height()
+        
+        # Sky gradient
+        for y in range(0, height // 2):
+            # Calculate color based on height
+            # Top is darker blue, gradually becoming lighter
+            r = int(100 + (y / (height // 2)) * 73)
+            g = int(150 + (y / (height // 2)) * 66)
+            b = int(235)
+            
+            pygame.draw.line(self.display_surface, (r, g, b), (0, y), (WIDTH, y))
     
     def start(self):
         """Start the level"""
