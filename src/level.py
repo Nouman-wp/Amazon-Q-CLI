@@ -115,7 +115,7 @@ class Level:
         # Create ground for the entire level - fill the bottom completely
         for x in range(0, level_width + TILE_SIZE, TILE_SIZE):
             # Create the top grass layer
-            Tile((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.collision_sprites], 'grass')
+            ground_tile = Tile((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.collision_sprites], 'grass')
             
             # Fill in dirt blocks below the grass to prevent void
             for y in range(HEIGHT, HEIGHT + TILE_SIZE * 3, TILE_SIZE):
@@ -159,13 +159,13 @@ class Level:
         Enemy((WIDTH * 2 + 500, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'jumping')
         Enemy((WIDTH * 2 + 700, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
         
-        # Create power-ups throughout the level
-        PowerUp((250, HEIGHT - 250), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed')
-        PowerUp((550, HEIGHT - 350), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility')
-        PowerUp((WIDTH + 150, HEIGHT - 300), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life')
-        PowerUp((WIDTH + 650, HEIGHT - 400), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility')
-        PowerUp((WIDTH * 2 + 350, HEIGHT - 320), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed')
-        PowerUp((WIDTH * 2 + 700, HEIGHT - 450), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life')
+        # Create power-ups throughout the level with collision detection
+        PowerUp((250, HEIGHT - 250), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
+        PowerUp((550, HEIGHT - 350), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
+        PowerUp((WIDTH + 150, HEIGHT - 300), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
+        PowerUp((WIDTH + 650, HEIGHT - 400), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
+        PowerUp((WIDTH * 2 + 350, HEIGHT - 320), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
+        PowerUp((WIDTH * 2 + 700, HEIGHT - 450), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
         
         # Create finish flag at the end of the extended level
         FinishFlag((WIDTH * 3 - 100, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.finish_sprites])

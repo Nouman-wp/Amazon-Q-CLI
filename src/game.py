@@ -117,10 +117,14 @@ class Game:
             self.current_level = 1  # Loop back to first level
             print("Looping back to first level")
         
+        # Force reload the level
         self.load_level(f"level{self.current_level}")
         self.state = STATE_PLAYING
         self.countdown = 3
         self.countdown_timer = pygame.time.get_ticks()
+        
+        # Reset UI timer
+        self.ui.reset_timer()
     
     def handle_events(self):
         """Handle pygame events"""
@@ -327,6 +331,11 @@ class Game:
                     elif event.key == pygame.K_ESCAPE or event.key == pygame.K_q:
                         print("ESC/Q key pressed in victory menu - quitting to menu")
                         self.quit_to_menu()
+                        return
+                    elif event.key == pygame.K_RETURN:
+                        # Default action for Enter key is to go to next level
+                        print("ENTER key pressed in victory menu - next level")
+                        self.next_level()
                         return
             
             # Update and draw the victory menu
