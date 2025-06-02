@@ -171,12 +171,28 @@ class UI:
             self.paused_time += pygame.time.get_ticks() - self.timer_start - self.current_time
             self.is_timer_running = True
     
-    def reset_timer(self):
-        """Reset the game timer"""
-        self.timer_start = pygame.time.get_ticks()
-        self.is_timer_running = True
-        self.paused_time = 0
-        self.current_time = 0
+    def format_time(self, milliseconds):
+        """Format time in milliseconds to MM:SS.mmm"""
+        seconds = milliseconds // 1000
+        minutes = seconds // 60
+        seconds = seconds % 60
+        milliseconds = milliseconds % 1000
+        return f"{minutes:02d}:{seconds:02d}.{milliseconds:03d}"
+    
+    def update_victory_menu(self, current_time, best_time):
+        """Update the victory menu with current and best times"""
+        # Format times
+        current_time_str = self.format_time(current_time)
+        best_time_str = self.format_time(best_time) if best_time else "None"
+        
+        # Update labels
+        self.victory_time_label.set_title(f"Your Time: {current_time_str}")
+        self.victory_best_label.set_title(f"Best Time: {best_time_str}")
+        
+    def draw_countdown(self, count):
+        """Draw countdown before level starts"""
+        count_text = self.font_large.render(str(count), True, WHITE)
+        self.screen.blit(count_text, (WIDTH/2 - count_text.get_width()/2, HEIGHT/2 - count_text.get_height()/2))
     
     def get_elapsed_time(self):
         """Get the elapsed time in milliseconds"""

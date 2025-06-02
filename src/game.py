@@ -197,6 +197,16 @@ class Game:
                                 print("Exiting game...")
                                 pygame.quit()
                                 sys.exit()
+                    
+                    # Also handle arrow keys for menu navigation
+                    elif event.key == pygame.K_UP:
+                        print("UP key pressed in main menu")
+                        # Move selection up (previous widget)
+                        self.ui.main_menu.move_index(-1)
+                    elif event.key == pygame.K_DOWN:
+                        print("DOWN key pressed in main menu")
+                        # Move selection down (next widget)
+                        self.ui.main_menu.move_index(1)
         
         elif self.state == STATE_PLAYING:
             # Draw level
@@ -242,6 +252,16 @@ class Game:
                                 self.restart_level()
                             elif title == 'Quit to Menu':
                                 self.quit_to_menu()
+                    
+                    # Also handle arrow keys for menu navigation
+                    elif event.key == pygame.K_UP:
+                        print("UP key pressed in pause menu")
+                        # Move selection up (previous widget)
+                        self.ui.pause_menu.move_index(-1)
+                    elif event.key == pygame.K_DOWN:
+                        print("DOWN key pressed in pause menu")
+                        # Move selection down (next widget)
+                        self.ui.pause_menu.move_index(1)
         
         elif self.state == STATE_GAME_OVER:
             # Fill with dark background
@@ -274,6 +294,16 @@ class Game:
                                 self.restart_level()
                             elif title == 'Quit to Menu':
                                 self.quit_to_menu()
+                    
+                    # Also handle arrow keys for menu navigation
+                    elif event.key == pygame.K_UP:
+                        print("UP key pressed in game over menu")
+                        # Move selection up (previous widget)
+                        self.ui.game_over_menu.move_index(-1)
+                    elif event.key == pygame.K_DOWN:
+                        print("DOWN key pressed in game over menu")
+                        # Move selection down (next widget)
+                        self.ui.game_over_menu.move_index(1)
         
         elif self.state == STATE_VICTORY:
             # Fill with victory background
@@ -311,10 +341,12 @@ class Game:
                     # Also handle arrow keys for menu navigation
                     elif event.key == pygame.K_UP:
                         print("UP key pressed in victory menu")
-                        self.ui.victory_menu.select_widget(self.ui.victory_menu.get_selected_widget_index() - 1)
+                        # Move selection up (previous widget)
+                        self.ui.victory_menu.move_index(-1)
                     elif event.key == pygame.K_DOWN:
                         print("DOWN key pressed in victory menu")
-                        self.ui.victory_menu.select_widget(self.ui.victory_menu.get_selected_widget_index() + 1)
+                        # Move selection down (next widget)
+                        self.ui.victory_menu.move_index(1)
         
         elif self.state == STATE_LEADERBOARD:
             # Draw leaderboard
