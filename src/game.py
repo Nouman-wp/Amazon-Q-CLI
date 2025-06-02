@@ -89,9 +89,11 @@ class Game:
     
     def next_level(self):
         """Go to the next level"""
+        print("Going to next level")
         self.current_level += 1
         if self.current_level > LEVEL_COUNT:
             self.current_level = 1  # Loop back to first level
+            print("Looping back to first level")
         
         self.load_level(f"level{self.current_level}")
         self.state = STATE_PLAYING
@@ -101,7 +103,7 @@ class Game:
     def handle_events(self):
         """Handle pygame events"""
         # Don't get events here for the menu state, as we handle them in render()
-        if self.state != STATE_MENU:
+        if self.state != STATE_MENU and self.state != STATE_VICTORY and self.state != STATE_GAME_OVER:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()

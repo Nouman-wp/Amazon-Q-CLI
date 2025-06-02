@@ -108,18 +108,18 @@ class Level:
         """Create a simple test level if no TMX file is available"""
         # Create ground
         for x in range(0, WIDTH + TILE_SIZE, TILE_SIZE):
-            Tile((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+            Tile((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.collision_sprites], 'grass')
         
-        # Create some platforms
+        # Create some platforms - make them more accessible for jumping
         for x in range(200, 400, TILE_SIZE):
-            Tile((x, HEIGHT - 200), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+            Tile((x, HEIGHT - 180), TILE_SIZE, [self.all_sprites, self.collision_sprites])
         
         for x in range(500, 700, TILE_SIZE):
-            Tile((x, HEIGHT - 300), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+            Tile((x, HEIGHT - 260), TILE_SIZE, [self.all_sprites, self.collision_sprites])
         
         # Create some hazards
         Hazard((300, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
-        Hazard((600, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
+        Hazard((600, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
         
         # Create some enemies
         Enemy((400, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')

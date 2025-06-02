@@ -10,6 +10,10 @@ class Enemy(pygame.sprite.Sprite):
     def __init__(self, pos, size, groups, patrol_distance=None, enemy_type='basic'):
         super().__init__(groups)
         
+        # Store parameters
+        self.size = size
+        self.patrol_distance = patrol_distance if patrol_distance else size * 3
+        
         # Load enemy sprites based on type
         self.enemy_type = enemy_type
         self.load_enemy_sprites()
@@ -28,6 +32,17 @@ class Enemy(pygame.sprite.Sprite):
         self.start_pos = pygame.math.Vector2(pos)
         self.pos = pygame.math.Vector2(self.rect.topleft)
         self.facing_right = False
+        self.moving_right = False
+        
+        # For jumping enemies
+        self.gravity = GRAVITY * 0.8  # Slightly less gravity than player
+        self.jump_timer = 0
+        self.jump_interval = 2000  # ms between jumps
+        
+        # For flying enemies
+        self.fly_amplitude = size  # How high it flies
+        self.fly_speed = 0.05  # Speed of flying oscillation
+        self.fly_offset = 0
         
     def animate(self):
         """Update enemy animation"""
@@ -143,19 +158,6 @@ class Enemy(pygame.sprite.Sprite):
                 
                 self.frames_right.append(surf)
                 self.frames_left.append(pygame.transform.flip(surf, True, False))
-        # Patrol behavior
-        self.patrol_distance = patrol_distance if patrol_distance else size * 4
-        self.moving_right = False
-        
-        # For jumping enemies
-        self.gravity = GRAVITY * 0.8  # Slightly less gravity than player
-        self.jump_timer = 0
-        self.jump_interval = 2000  # ms between jumps
-        
-        # For flying enemies
-        self.fly_amplitude = size  # How high it flies
-        self.fly_speed = 0.05  # Speed of flying oscillation
-        self.fly_offset = 0
     
     def patrol(self):
         """Basic patrol behavior - move back and forth"""

@@ -137,6 +137,22 @@ class UI:
         print("Next level button pressed!")  # Debug print
         pass
     
+    def draw_hud(self, lives, current_level):
+        """Draw the HUD (heads-up display)"""
+        # Draw lives
+        lives_text = self.font_medium.render(f"Lives: {lives}", True, WHITE)
+        self.screen.blit(lives_text, (20, 20))
+        
+        # Draw level
+        level_text = self.font_medium.render(f"Level: {current_level}", True, WHITE)
+        self.screen.blit(level_text, (20, 60))
+        
+        # Draw timer if running
+        if self.is_timer_running:
+            self.current_time = pygame.time.get_ticks() - self.timer_start - self.paused_time
+            timer_text = self.font_medium.render(f"Time: {self.format_time(self.current_time)}", True, WHITE)
+            self.screen.blit(timer_text, (WIDTH - timer_text.get_width() - 20, 20))
+    
     def start_timer(self):
         """Start the game timer"""
         self.timer_start = pygame.time.get_ticks()
