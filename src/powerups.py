@@ -79,42 +79,19 @@ class PowerUp(pygame.sprite.Sprite):
         
         self.rect = self.image.get_rect(topleft=pos)
         
-        # Animation
-        self.float_y = float(pos[1])
-        self.float_speed = 0.5
-        self.float_direction = 1
-        self.float_distance = 5
+        # Store the original position - powerups will stay fixed
+        self.original_pos = pos
         
-        # Pulsing effect
+        # Pulsing effect only - no movement
         self.pulse_scale = 1.0
         self.pulse_direction = -0.01
         self.min_scale = 0.8
         self.max_scale = 1.2
         self.original_image = self.image.copy()
         self.original_size = self.image.get_size()
-        
-        # Physics - FIXED: No physics, just static positioning
-        self.on_ground = True  # Always on ground
-        
-        # Force initial collision check to ensure powerups don't fall through platforms
-        if self.collision_sprites:
-            self.check_initial_collision()
-    
-    def check_initial_collision(self):
-        """Check if the powerup is already on a platform when created"""
-        # This is now just a placeholder - powerups are static
-        self.on_ground = True
     
     def update(self):
-        """Update powerup animation"""
-        # Only do floating animation - no gravity or physics
-        # Floating animation
-        self.float_y += self.float_speed * self.float_direction
-        if abs(self.float_y - self.rect.y) >= self.float_distance:
-            self.float_direction *= -1
-        
-        self.rect.y = int(self.float_y)
-        
+        """Update powerup animation - only pulsing, no movement"""
         # Pulsing animation
         self.pulse_scale += self.pulse_direction
         if self.pulse_scale <= self.min_scale or self.pulse_scale >= self.max_scale:
@@ -132,3 +109,6 @@ class PowerUp(pygame.sprite.Sprite):
             x_offset = (self.original_size[0] - new_width) // 2
             y_offset = (self.original_size[1] - new_height) // 2
             self.image.blit(scaled_image, (x_offset, y_offset))
+        
+        # Always keep the powerup at its original position
+        self.rect.topleft = self.original_pos

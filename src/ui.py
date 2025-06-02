@@ -262,57 +262,44 @@ class UI:
     
     def show_powerup_notification(self, powerup_type):
         """Display a notification when player collects a powerup"""
-        self.powerup_message = powerup_type.upper() + " ACTIVATED!"
+        # Format the message nicely based on powerup type
+        if powerup_type.lower() == "speed boost":
+            self.powerup_message = "SPEED BOOST!"
+        elif powerup_type.lower() == "invincibility":
+            self.powerup_message = "INVINCIBILITY!"
+        elif powerup_type.lower() == "extra life":
+            self.powerup_message = "EXTRA LIFE!"
+        else:
+            self.powerup_message = powerup_type.upper() + "!"
+            
         self.powerup_display_time = pygame.time.get_ticks()
     
     def draw_hud(self, lives, current_level):
         """Draw the HUD (heads-up display)"""
-        # Create a semi-transparent HUD background with gradient
-        hud_height = 100
-        hud_surface = pygame.Surface((WIDTH, hud_height), pygame.SRCALPHA)
-        
-        # Create gradient background
-        for y in range(hud_height):
-            alpha = max(128 - y, 0)  # Fade out as we go down
-            pygame.draw.line(hud_surface, (0, 0, 0, alpha), (0, y), (WIDTH, y))
-        
+        # Create a semi-transparent HUD background
+        hud_surface = pygame.Surface((WIDTH, 100), pygame.SRCALPHA)
+        hud_surface.fill((0, 0, 0, 128))  # Semi-transparent black
         self.screen.blit(hud_surface, (0, 0))
         
-        # Draw decorative border at the bottom of HUD
-        pygame.draw.line(self.screen, (100, 100, 255, 128), (0, hud_height-1), (WIDTH, hud_height-1), 2)
-        
-        # Draw lives with animated heart icons
+        # Draw lives with heart icons
         lives_text = self.font_medium.render("Lives:", True, WHITE)
         self.screen.blit(lives_text, (20, 20))
         
         for i in range(lives):
-            # Draw a heart with pulsing effect
+            # Draw a heart
             heart_pos = (lives_text.get_width() + 40 + i * 40, 20)
-            pulse = 0.1 * abs(math.sin(pygame.time.get_ticks() / 500))
-            self.draw_heart(heart_pos, 1.0 + pulse)
+            self.draw_heart(heart_pos)
         
-        # Draw level with a fancy border and glow effect
+        # Draw level with a fancy border
         level_text = self.font_medium.render(f"Level {current_level}", True, YELLOW)
         level_rect = level_text.get_rect(center=(WIDTH // 2, 30))
-        
-        # Draw glow
-        glow_surf = pygame.Surface((level_rect.width + 40, level_rect.height + 20), pygame.SRCALPHA)
-        for i in range(10, 0, -2):
-            alpha = 10 * i
-            color = (0, 0, 255, alpha)
-            pygame.draw.rect(glow_surf, color, 
-                            (10-i, 10-i, level_rect.width + i*2, level_rect.height + i*2), 
-                            border_radius=10)
         
         # Draw border
         border_rect = level_rect.inflate(20, 10)
         pygame.draw.rect(self.screen, BLUE, border_rect, border_radius=5)
         pygame.draw.rect(self.screen, LIGHT_BLUE, border_rect, 2, border_radius=5)
         
-        # Draw level text with shadow
-        shadow_text = self.font_medium.render(f"Level {current_level}", True, (0, 0, 0))
-        shadow_rect = shadow_text.get_rect(center=(WIDTH // 2 + 2, 32))
-        self.screen.blit(shadow_text, shadow_rect)
+        # Draw level text
         self.screen.blit(level_text, level_rect)
         
         # Draw timer with a fancy display
@@ -321,22 +308,11 @@ class UI:
             timer_text = self.font_medium.render(f"Time: {self.format_time(self.current_time)}", True, WHITE)
             timer_rect = timer_text.get_rect(topright=(WIDTH - 20, 20))
             
-            # Draw timer background with gradient
+            # Draw timer background
             timer_bg_rect = timer_rect.inflate(20, 10)
-            timer_bg_surf = pygame.Surface((timer_bg_rect.width, timer_bg_rect.height), pygame.SRCALPHA)
-            for y in range(timer_bg_rect.height):
-                alpha = 180 - y * 3
-                if alpha > 0:
-                    pygame.draw.line(timer_bg_surf, (50, 50, 50, alpha), 
-                                    (0, y), (timer_bg_rect.width, y))
-            
-            self.screen.blit(timer_bg_surf, timer_bg_rect)
+            pygame.draw.rect(self.screen, (50, 50, 50, 180), timer_bg_rect, border_radius=5)
             pygame.draw.rect(self.screen, (100, 100, 100), timer_bg_rect, 2, border_radius=5)
             
-            # Draw timer text with shadow
-            shadow_timer = self.font_medium.render(f"Time: {self.format_time(self.current_time)}", True, (0, 0, 0))
-            shadow_timer_rect = shadow_timer.get_rect(topright=(WIDTH - 18, 22))
-            self.screen.blit(shadow_timer, shadow_timer_rect)
             self.screen.blit(timer_text, timer_rect)
         
         # Draw powerup notification if active
@@ -349,8 +325,7 @@ class UI:
                 alpha = 255 * (1 - (current_time - self.powerup_display_time - (self.powerup_duration - 1000)) / 1000)
             
             # Create notification text with pulsing effect
-            pulse = 0.1 * abs(math.sin((current_time - self.powerup_display_time) / 100))
-            size = int(40 + pulse * 10)
+            size = 40
             powerup_font = pygame.font.Font(None, size)
             
             powerup_text = powerup_font.render(self.powerup_message, True, (255, 255, 0))
@@ -360,72 +335,30 @@ class UI:
             text_rect = powerup_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
             bg_rect = text_rect.inflate(40, 20)
             bg_surface = pygame.Surface((bg_rect.width, bg_rect.height), pygame.SRCALPHA)
-            
-            # Gradient background
-            for y in range(bg_rect.height):
-                bg_alpha = min(int(alpha * 0.7), 180)
-                color_value = max(0, 50 - abs(y - bg_rect.height//2) * 2)
-                pygame.draw.line(bg_surface, (color_value, color_value, color_value, bg_alpha), 
-                                (0, y), (bg_rect.width, y))
+            bg_surface.fill((0, 0, 0, int(alpha * 0.7)))
             
             # Draw background and text
             self.screen.blit(bg_surface, bg_rect)
-            
-            # Draw glowing border
-            pygame.draw.rect(self.screen, (255, 255, 0, int(alpha * 0.5)), bg_rect, 2, border_radius=10)
-            
-            # Draw text with shadow
-            shadow_powerup = powerup_font.render(self.powerup_message, True, (0, 0, 0))
-            shadow_powerup.set_alpha(int(alpha * 0.7))
-            shadow_rect = shadow_powerup.get_rect(center=(WIDTH // 2 + 2, HEIGHT // 4 + 2))
-            self.screen.blit(shadow_powerup, shadow_rect)
             self.screen.blit(powerup_text, text_rect)
-            
-            # Add a glowing effect
-            glow_size = int(size * 1.1)
-            glow_font = pygame.font.Font(None, glow_size)
-            glow_text = glow_font.render(self.powerup_message, True, (255, 255, 0, int(alpha * 0.3)))
-            glow_rect = glow_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
-            self.screen.blit(glow_text, glow_rect)
-            
-            # Add animated particles around the text
-            particle_count = 10
-            for i in range(particle_count):
-                angle = (current_time / 200 + i * (2 * math.pi / particle_count)) % (2 * math.pi)
-                distance = 50 + 10 * math.sin(current_time / 300 + i)
-                x = WIDTH // 2 + math.cos(angle) * distance
-                y = HEIGHT // 4 + math.sin(angle) * distance
-                size = 3 + 2 * math.sin(current_time / 200 + i)
-                particle_alpha = int(alpha * 0.8)
-                pygame.draw.circle(self.screen, (255, 255, 0, particle_alpha), (int(x), int(y)), int(size))
     
-    def draw_heart(self, pos, scale=1.0):
-        """Draw a heart icon for lives with optional scaling"""
+    def draw_heart(self, pos):
+        """Draw a heart icon for lives"""
         x, y = pos
-        size = 24 * scale
+        size = 24
         
         # Draw a simple heart shape
         heart_color = (255, 0, 0)  # Red
         
-        # Create a surface for the heart
-        heart_surf = pygame.Surface((size*1.2, size*1.2), pygame.SRCALPHA)
-        
         # Draw the two circles for the top of the heart
-        pygame.draw.circle(heart_surf, heart_color, (size//3, size//3), size//3)
-        pygame.draw.circle(heart_surf, heart_color, (size - size//3, size//3), size//3)
+        pygame.draw.circle(self.screen, heart_color, (x + size//4, y + size//4), size//4)
+        pygame.draw.circle(self.screen, heart_color, (x + size - size//4, y + size//4), size//4)
         
         # Draw the triangle for the bottom of the heart
-        pygame.draw.polygon(heart_surf, heart_color, [
-            (0, size//3),
-            (size//2, size),
-            (size, size//3)
+        pygame.draw.polygon(self.screen, heart_color, [
+            (x, y + size//4),
+            (x + size//2, y + size),
+            (x + size, y + size//4)
         ])
-        
-        # Add a shine effect
-        pygame.draw.circle(heart_surf, (255, 200, 200), (size//4, size//4), size//8)
-        
-        # Blit the heart to the screen
-        self.screen.blit(heart_surf, (x - size*0.6, y - size*0.6))
     
     def start_timer(self):
         """Start the game timer"""
@@ -479,86 +412,31 @@ class UI:
         
     def draw_countdown(self, count):
         """Draw countdown before level starts"""
-        # Create a fancy countdown display with multiple effects
-        
         # Create a darkening overlay for better visibility
         overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 150))
         self.screen.blit(overlay, (0, 0))
         
-        # Calculate pulsing effect
-        pulse_time = pygame.time.get_ticks() % 1000
-        pulse_scale = 1.0
-        if pulse_time < 500:
-            pulse_scale = 1.0 + (pulse_time / 500) * 0.5
-        else:
-            pulse_scale = 1.5 - ((pulse_time - 500) / 500) * 0.5
-            
-        count_size = int(150 * pulse_scale)
-        
-        # Create a larger font for the countdown
+        # Simple, large countdown number that's clearly visible
+        count_size = 150
         count_font = pygame.font.Font(None, count_size)
         
-        # Create glowing layers with different colors
-        colors = [
-            (255, 0, 0, 50),    # Red glow
-            (255, 165, 0, 80),  # Orange glow
-            (255, 255, 0, 120), # Yellow glow
-            (255, 255, 255)     # White text
-        ]
+        # Draw the number with a glow effect
+        # First draw shadow
+        shadow_text = count_font.render(str(count), True, (0, 0, 0))
+        shadow_rect = shadow_text.get_rect(center=(WIDTH/2 + 5, HEIGHT/2 + 5))
+        self.screen.blit(shadow_text, shadow_rect)
         
-        # Draw multiple layers for glow effect
-        for i, color in enumerate(colors):
-            size_offset = (len(colors) - i - 1) * 15
-            glow_font = pygame.font.Font(None, count_size + size_offset)
-            glow_text = glow_font.render(str(count), True, color)
-            glow_rect = glow_text.get_rect(center=(WIDTH/2, HEIGHT/2))
-            self.screen.blit(glow_text, glow_rect)
+        # Then draw main text
+        count_text = count_font.render(str(count), True, (255, 255, 0))
+        count_rect = count_text.get_rect(center=(WIDTH/2, HEIGHT/2))
+        self.screen.blit(count_text, count_rect)
         
         # Add a circle background
-        circle_radius = count_size + 30
-        for i in range(5):
-            alpha = 150 - i * 30
-            if alpha > 0:
-                pygame.draw.circle(self.screen, (0, 0, 100, alpha), (WIDTH/2, HEIGHT/2), circle_radius + i*10)
+        circle_radius = count_size
+        pygame.draw.circle(self.screen, (0, 0, 100, 150), (WIDTH/2, HEIGHT/2), circle_radius, 5)
         
-        pygame.draw.circle(self.screen, (0, 0, 200, 150), (WIDTH/2, HEIGHT/2), circle_radius)
-        pygame.draw.circle(self.screen, (100, 100, 255, 200), (WIDTH/2, HEIGHT/2), circle_radius, 5)
-        
-        # Add "Get Ready!" text with animation
-        ready_text = "Get Ready!"
-        char_spacing = 20
-        total_width = len(ready_text) * char_spacing
-        
-        for i, char in enumerate(ready_text):
-            # Calculate vertical bounce for each character
-            char_time = (pygame.time.get_ticks() + i * 100) % 1000
-            y_offset = abs(math.sin(char_time / 1000 * math.pi * 2)) * 10
-            
-            # Calculate position
-            x_pos = WIDTH/2 - total_width/2 + i * char_spacing
-            y_pos = HEIGHT/2 + circle_radius + 40 - y_offset
-            
-            # Draw character with shadow
-            char_font = self.font_medium
-            shadow = char_font.render(char, True, (0, 0, 0))
-            text = char_font.render(char, True, WHITE)
-            
-            self.screen.blit(shadow, (x_pos + 2, y_pos + 2))
-            self.screen.blit(text, (x_pos, y_pos))
-        
-        # Add particles around the countdown
-        particle_count = 20
-        for i in range(particle_count):
-            angle = (pygame.time.get_ticks() / 200 + i * (2 * math.pi / particle_count)) % (2 * math.pi)
-            distance = circle_radius + 20 + 10 * math.sin(pygame.time.get_ticks() / 300 + i)
-            x = WIDTH/2 + math.cos(angle) * distance
-            y = HEIGHT/2 + math.sin(angle) * distance
-            size = 3 + 2 * math.sin(pygame.time.get_ticks() / 200 + i)
-            
-            # Gradient color based on position
-            r = 255
-            g = int(128 + 127 * math.sin(angle))
-            b = int(128 + 127 * math.cos(angle))
-            
-            pygame.draw.circle(self.screen, (r, g, b), (int(x), int(y)), int(size))
+        # Add "Get Ready!" text
+        ready_text = self.font_medium.render("Get Ready!", True, WHITE)
+        ready_rect = ready_text.get_rect(center=(WIDTH/2, HEIGHT/2 + circle_radius + 20))
+        self.screen.blit(ready_text, ready_rect)

@@ -290,17 +290,20 @@ class Level:
                     self.player.activate_speed_boost(powerup.duration)
                     print("Speed boost activated!")
                     # Show notification on UI
-                    self.ui.show_powerup_notification("Speed Boost")
+                    if self.ui:
+                        self.ui.show_powerup_notification("Speed Boost")
                 elif powerup.type == 'invincibility':
                     self.player.activate_invincibility(powerup.duration)
                     print("Invincibility activated!")
                     # Show notification on UI
-                    self.ui.show_powerup_notification("Invincibility")
+                    if self.ui:
+                        self.ui.show_powerup_notification("Invincibility")
                 elif powerup.type == 'extra_life':
                     self.player.lives += 1
                     print("Extra life collected! Lives:", self.player.lives)
                     # Show notification on UI
-                    self.ui.show_powerup_notification("Extra Life")
+                    if self.ui:
+                        self.ui.show_powerup_notification("Extra Life")
                 
                 # Remove powerup
                 powerup.kill()
