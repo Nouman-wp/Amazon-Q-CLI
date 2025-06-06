@@ -380,9 +380,9 @@ class Level:
         checkpoint1 = Checkpoint((WIDTH * 2, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.checkpoint_sprites])
         self.checkpoint_positions.append((WIDTH * 2, HEIGHT - TILE_SIZE * 2))
         
-        # Second checkpoint - after the second section
-        checkpoint2 = Checkpoint((WIDTH * 6, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.checkpoint_sprites])
-        self.checkpoint_positions.append((WIDTH * 6, HEIGHT - TILE_SIZE * 2))
+        # Second checkpoint - after the second section (moved back to safe ground)
+        checkpoint2 = Checkpoint((WIDTH * 5 + 800, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.checkpoint_sprites])
+        self.checkpoint_positions.append((WIDTH * 5 + 800, HEIGHT - TILE_SIZE * 2))
         
         # Create finish flag at the end of the extended level
         FinishFlag((WIDTH * 9 - 100, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.finish_sprites])

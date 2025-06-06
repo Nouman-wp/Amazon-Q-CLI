@@ -54,16 +54,24 @@ class UI:
         theme.widget_font_shadow_color = (0, 0, 0)
         theme.widget_font_shadow_offset = 2
         theme.cursor_selection_color = (0, 120, 215)
+        
+        # Fix for pygame-menu 4.4.3
+        theme.widget_selection_effect = pygame_menu.widgets.NoneSelection()
+        
         return theme
     
     def create_main_menu(self):
-        """Create the main menu with enhanced visuals"""
+        """Create a completely redesigned modern main menu"""
         # Create a custom theme with premium styling
         theme = self.create_modern_theme()
         
-        # Create the menu with a custom background
+        # Don't try to hide the title, use a normal title instead
+        theme.title_font_size = 60
+        theme.background_color = (0, 0, 0, 180)  # Semi-transparent background
+        
+        # Create the menu with a custom background and a proper title
         self.main_menu = pygame_menu.Menu(
-            'SpeedRunner X', 
+            'SPEEDRUNNER X', 
             WIDTH, HEIGHT,
             theme=theme,
             mouse_enabled=True,
@@ -71,27 +79,25 @@ class UI:
             onclose=pygame_menu.events.CLOSE
         )
         
-        # Add a decorative header with game logo and glow effect
-        self.main_menu.add.label('SPEEDRUNNER X', font_size=90, font_color=(255, 215, 0))
+        # Add subtitle
+        subtitle_label = self.main_menu.add.label('ULTIMATE CHALLENGE EDITION', font_size=36, font_color=(173, 216, 230))
         
-        self.main_menu.add.label('ULTIMATE CHALLENGE EDITION', font_size=40, font_color=(173, 216, 230))
-        
-        # Add decorative line with animation effect
+        # Add decorative separator
         self.main_menu.add.label('★ ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ ★', font_size=30, font_color=(100, 200, 255))
-        self.main_menu.add.vertical_margin(30)
+        self.main_menu.add.vertical_margin(40)
         
-        # Add menu buttons with premium styling and effects
+        # Add menu buttons with premium styling
         start_button = self.main_menu.add.button('START GAME', self.start_game, font_size=45)
         start_button.set_background_color((0, 120, 0))
         start_button.set_border(3, (0, 255, 0))
         
-        self.main_menu.add.vertical_margin(15)
+        self.main_menu.add.vertical_margin(20)
         
         leaderboard_button = self.main_menu.add.button('LEADERBOARD', self.show_leaderboard, font_size=45)
         leaderboard_button.set_background_color((0, 0, 150))
         leaderboard_button.set_border(3, (0, 150, 255))
         
-        self.main_menu.add.vertical_margin(15)
+        self.main_menu.add.vertical_margin(20)
         
         exit_button = self.main_menu.add.button('EXIT', pygame_menu.events.EXIT, font_size=45)
         exit_button.set_background_color((150, 0, 0))
@@ -99,11 +105,12 @@ class UI:
         
         self.main_menu.add.vertical_margin(40)
         
-        # Add game instructions with premium styling
-        self.main_menu.add.label('HOW TO PLAY', font_size=35, font_color=(255, 165, 0))
+        # Add instructions title
+        instructions_title = self.main_menu.add.label('HOW TO PLAY', font_size=35, font_color=(255, 165, 0))
         
         # Add a decorative separator
         self.main_menu.add.label('✧ ✧ ✧', font_size=24, font_color=(255, 255, 150))
+        self.main_menu.add.vertical_margin(10)
         
         # Add instructions with icons
         self.main_menu.add.label('➤ Arrow Keys / WASD: Move', font_size=28, font_color=(220, 220, 220))
@@ -112,9 +119,9 @@ class UI:
         self.main_menu.add.label('➤ Jump on enemies to defeat them!', font_size=28, font_color=(220, 220, 220))
         self.main_menu.add.label('➤ Collect powerups for special abilities!', font_size=28, font_color=(220, 220, 220))
         
-        # Add version info with premium styling
-        self.main_menu.add.vertical_margin(30)
-        self.main_menu.add.label('Version 2.0 - Extended Challenge Edition', font_size=18, font_color=(150, 150, 200))
+        # Add version info at the bottom
+        self.main_menu.add.vertical_margin(20)
+        version_label = self.main_menu.add.label('Version 2.0 - Extended Challenge Edition', font_size=18, font_color=(150, 150, 200))
     
     def create_pause_menu(self):
         """Create the pause menu with premium styling"""
