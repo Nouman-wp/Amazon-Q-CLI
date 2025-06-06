@@ -32,25 +32,27 @@ class UI:
         self.powerup_duration = 3000  # Display for 3 seconds
     
     def create_main_menu(self):
-        """Create the main menu"""
+        """Create the main menu with enhanced visuals"""
+        # Create a custom theme with premium styling
         theme = pygame_menu.themes.THEME_DARK.copy()
         theme.widget_font_size = 36
         theme.title_font_size = 60
-        theme.title_background_color = (0, 0, 100)
-        theme.background_color = (0, 0, 50, 200)
+        theme.title_background_color = (0, 0, 100, 200)
+        theme.background_color = (0, 0, 50, 150)  # More transparent for better visuals
         theme.widget_font_color = (255, 255, 255)
         theme.widget_alignment = pygame_menu.locals.ALIGN_CENTER
         
         # Enhanced UI with custom colors and styling
         theme.title_font_shadow = True
         theme.title_font_shadow_color = (0, 0, 0)
-        theme.title_font_shadow_offset = 2
+        theme.title_font_shadow_offset = 3
         theme.widget_font_shadow = True
         theme.widget_font_shadow_color = (0, 0, 0)
         theme.widget_font_shadow_offset = 2
-        theme.widget_margin = (0, 10)
-        theme.widget_padding = 10
+        theme.widget_margin = (0, 12)
+        theme.widget_padding = 12
         
+        # Create the menu with a custom background
         self.main_menu = pygame_menu.Menu(
             'SpeedRunner X', 
             WIDTH, HEIGHT,
@@ -60,55 +62,69 @@ class UI:
             onclose=pygame_menu.events.CLOSE
         )
         
-        # Add a decorative header with game logo
-        self.main_menu.add.label('SPEEDRUNNER X', font_size=70, font_color=(255, 215, 0))
-        self.main_menu.add.label('The Ultimate Platform Adventure', font_size=30, font_color=(173, 216, 230))
+        # Add a decorative header with game logo and glow effect
+        self.main_menu.add.label('SPEEDRUNNER X', font_size=90, font_color=(255, 215, 0))
         
-        # Add decorative line
-        self.main_menu.add.label('⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯', font_size=30, font_color=(100, 200, 255))
-        self.main_menu.add.vertical_margin(20)
+        self.main_menu.add.label('ULTIMATE CHALLENGE EDITION', font_size=40, font_color=(173, 216, 230))
         
-        # Add menu buttons directly without frames
-        self.main_menu.add.button('START GAME', self.start_game, font_size=40, 
-                                 background_color=(0, 100, 0))
-        self.main_menu.add.vertical_margin(10)
-        self.main_menu.add.button('LEADERBOARD', self.show_leaderboard, font_size=40,
-                                 background_color=(0, 0, 100))
-        self.main_menu.add.vertical_margin(10)
-        self.main_menu.add.button('EXIT', pygame_menu.events.EXIT, font_size=40,
-                                 background_color=(100, 0, 0))
-        
+        # Add decorative line with animation effect
+        self.main_menu.add.label('★ ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ ★', font_size=30, font_color=(100, 200, 255))
         self.main_menu.add.vertical_margin(30)
         
-        # Add game instructions
-        self.main_menu.add.label('HOW TO PLAY', font_size=30, font_color=(255, 165, 0))
-        self.main_menu.add.label('Arrow Keys / WASD: Move', font_size=24)
-        self.main_menu.add.label('Space: Jump', font_size=24)
-        self.main_menu.add.label('Jump on enemies to defeat them!', font_size=24)
-        self.main_menu.add.label('Collect powerups for special abilities!', font_size=24)
+        # Add menu buttons with premium styling and effects
+        start_button = self.main_menu.add.button('START GAME', self.start_game, font_size=45)
+        start_button.set_background_color((0, 120, 0))
+        start_button.set_border(3, (0, 255, 0))
         
-        # Add version info
-        self.main_menu.add.vertical_margin(20)
-        self.main_menu.add.label('Version 1.0', font_size=16, font_color=(150, 150, 150))
+        self.main_menu.add.vertical_margin(15)
+        
+        leaderboard_button = self.main_menu.add.button('LEADERBOARD', self.show_leaderboard, font_size=45)
+        leaderboard_button.set_background_color((0, 0, 150))
+        leaderboard_button.set_border(3, (0, 150, 255))
+        
+        self.main_menu.add.vertical_margin(15)
+        
+        exit_button = self.main_menu.add.button('EXIT', pygame_menu.events.EXIT, font_size=45)
+        exit_button.set_background_color((150, 0, 0))
+        exit_button.set_border(3, (255, 0, 0))
+        
+        self.main_menu.add.vertical_margin(40)
+        
+        # Add game instructions with premium styling
+        self.main_menu.add.label('HOW TO PLAY', font_size=35, font_color=(255, 165, 0))
+        
+        # Add a decorative separator
+        self.main_menu.add.label('✧ ✧ ✧', font_size=24, font_color=(255, 255, 150))
+        
+        # Add instructions with icons
+        self.main_menu.add.label('➤ Arrow Keys / WASD: Move', font_size=28, font_color=(220, 220, 220))
+        self.main_menu.add.label('➤ Space: Jump', font_size=28, font_color=(220, 220, 220))
+        self.main_menu.add.label('➤ P: Pause Game', font_size=28, font_color=(220, 220, 220))
+        self.main_menu.add.label('➤ Jump on enemies to defeat them!', font_size=28, font_color=(220, 220, 220))
+        self.main_menu.add.label('➤ Collect powerups for special abilities!', font_size=28, font_color=(220, 220, 220))
+        
+        # Add version info with premium styling
+        self.main_menu.add.vertical_margin(30)
+        self.main_menu.add.label('Version 2.0 - Extended Challenge Edition', font_size=18, font_color=(150, 150, 200))
     
     def create_pause_menu(self):
-        """Create the pause menu"""
+        """Create the pause menu with premium styling"""
         theme = pygame_menu.themes.THEME_DARK.copy()
-        theme.widget_font_size = 32
-        theme.title_font_size = 40
-        theme.title_background_color = (0, 0, 100)
-        theme.background_color = (0, 0, 50, 200)
+        theme.widget_font_size = 36
+        theme.title_font_size = 45
+        theme.title_background_color = (0, 0, 100, 200)
+        theme.background_color = (0, 0, 50, 180)
         theme.widget_font_color = (255, 255, 255)
         
         # Enhanced UI with custom colors and styling
         theme.title_font_shadow = True
         theme.title_font_shadow_color = (0, 0, 0)
-        theme.title_font_shadow_offset = 2
+        theme.title_font_shadow_offset = 3
         theme.widget_font_shadow = True
         theme.widget_font_shadow_color = (0, 0, 0)
         theme.widget_font_shadow_offset = 2
-        theme.widget_margin = (0, 10)
-        theme.widget_padding = 10
+        theme.widget_margin = (0, 15)
+        theme.widget_padding = 15
         
         self.pause_menu = pygame_menu.Menu(
             'GAME PAUSED', 
@@ -119,42 +135,53 @@ class UI:
             onclose=pygame_menu.events.CLOSE
         )
         
-        # Add a decorative pause icon
-        self.pause_menu.add.label('❚❚', font_size=60, font_color=(255, 255, 0))
-        self.pause_menu.add.vertical_margin(20)
+        # Add a decorative pause icon with glow effect
+        self.pause_menu.add.label('❚❚', font_size=80, font_color=(255, 255, 0))
+        self.pause_menu.add.vertical_margin(25)
         
-        # Add buttons directly without frames
-        self.pause_menu.add.button('RESUME', self.resume_game, font_size=36,
-                                  background_color=(0, 100, 0))
-        self.pause_menu.add.vertical_margin(10)
-        self.pause_menu.add.button('RESTART LEVEL', self.restart_level, font_size=36,
-                                  background_color=(0, 0, 100))
-        self.pause_menu.add.vertical_margin(10)
-        self.pause_menu.add.button('QUIT TO MENU', self.quit_to_menu, font_size=36,
-                                  background_color=(100, 0, 0))
+        # Add a decorative separator
+        self.pause_menu.add.label('✧ ✧ ✧', font_size=24, font_color=(255, 255, 150))
+        self.pause_menu.add.vertical_margin(15)
         
-        # Add keyboard shortcut hints
-        self.pause_menu.add.vertical_margin(20)
-        self.pause_menu.add.label('ESC: Resume   R: Restart', font_size=20, font_color=(200, 200, 200))
+        # Add buttons with premium styling
+        resume_button = self.pause_menu.add.button('RESUME', self.resume_game, font_size=40)
+        resume_button.set_background_color((0, 120, 0))
+        resume_button.set_border(3, (0, 255, 0))
+        
+        self.pause_menu.add.vertical_margin(15)
+        
+        restart_button = self.pause_menu.add.button('RESTART LEVEL', self.restart_level, font_size=40)
+        restart_button.set_background_color((0, 0, 150))
+        restart_button.set_border(3, (0, 150, 255))
+        
+        self.pause_menu.add.vertical_margin(15)
+        
+        quit_button = self.pause_menu.add.button('QUIT TO MENU', self.quit_to_menu, font_size=40)
+        quit_button.set_background_color((150, 0, 0))
+        quit_button.set_border(3, (255, 0, 0))
+        
+        # Add keyboard shortcut hints with improved styling
+        self.pause_menu.add.vertical_margin(25)
+        self.pause_menu.add.label('ESC: Resume   R: Restart', font_size=22, font_color=(200, 200, 255))
     
     def create_game_over_menu(self):
-        """Create the game over menu"""
+        """Create the game over menu with premium styling"""
         theme = pygame_menu.themes.THEME_DARK.copy()
-        theme.widget_font_size = 32
-        theme.title_font_size = 50
-        theme.title_background_color = (150, 0, 0)  # Dark red
-        theme.background_color = (50, 0, 0, 200)  # Semi-transparent dark red
+        theme.widget_font_size = 36
+        theme.title_font_size = 55
+        theme.title_background_color = (150, 0, 0, 220)
+        theme.background_color = (50, 0, 0, 180)
         theme.widget_font_color = (255, 255, 255)
         
         # Enhanced UI with custom colors and styling
         theme.title_font_shadow = True
         theme.title_font_shadow_color = (0, 0, 0)
-        theme.title_font_shadow_offset = 2
+        theme.title_font_shadow_offset = 3
         theme.widget_font_shadow = True
         theme.widget_font_shadow_color = (0, 0, 0)
         theme.widget_font_shadow_offset = 2
-        theme.widget_margin = (0, 10)
-        theme.widget_padding = 10
+        theme.widget_margin = (0, 15)
+        theme.widget_padding = 15
         
         self.game_over_menu = pygame_menu.Menu(
             'GAME OVER', 
@@ -165,40 +192,51 @@ class UI:
             onclose=pygame_menu.events.CLOSE
         )
         
-        # Add a decorative skull icon
-        self.game_over_menu.add.label('☠', font_size=80, font_color=(255, 255, 255))
-        self.game_over_menu.add.label('You lost all your lives!', font_size=36, font_color=(255, 100, 100))
+        # Add a decorative skull icon with glow effect
+        self.game_over_menu.add.label('☠', font_size=100, font_color=(255, 255, 255))
+        
+        # Add message with dramatic styling
+        self.game_over_menu.add.label('You lost all your lives!', font_size=40, font_color=(255, 100, 100))
+        
         self.game_over_menu.add.vertical_margin(30)
         
-        # Add buttons directly without frames
-        self.game_over_menu.add.button('RETRY LEVEL', self.restart_level, font_size=36,
-                                      background_color=(0, 100, 0))
+        # Add a decorative separator
+        self.game_over_menu.add.label('✧ ✧ ✧', font_size=24, font_color=(255, 100, 100))
         self.game_over_menu.add.vertical_margin(15)
-        self.game_over_menu.add.button('QUIT TO MENU', self.quit_to_menu, font_size=36,
-                                      background_color=(100, 0, 0))
         
-        # Add keyboard shortcut hints
-        self.game_over_menu.add.vertical_margin(20)
-        self.game_over_menu.add.label('R: Retry   ESC: Quit to Menu', font_size=20, font_color=(200, 200, 200))
+        # Add buttons with premium styling
+        retry_button = self.game_over_menu.add.button('RETRY LEVEL', self.restart_level, font_size=40)
+        retry_button.set_background_color((0, 120, 0))
+        retry_button.set_border(3, (0, 255, 0))
+        
+        self.game_over_menu.add.vertical_margin(15)
+        
+        quit_button = self.game_over_menu.add.button('QUIT TO MENU', self.quit_to_menu, font_size=40)
+        quit_button.set_background_color((150, 0, 0))
+        quit_button.set_border(3, (255, 0, 0))
+        
+        # Add keyboard shortcut hints with improved styling
+        self.game_over_menu.add.vertical_margin(25)
+        self.game_over_menu.add.label('R: Retry   ESC: Quit to Menu', font_size=22, font_color=(255, 200, 200))
     
     def create_victory_menu(self):
-        """Create the victory menu"""
+        """Create the victory menu with premium styling"""
         theme = pygame_menu.themes.THEME_DARK.copy()
-        theme.widget_font_size = 32
-        theme.title_font_size = 50
-        theme.title_background_color = (0, 100, 0)  # Dark green
-        theme.background_color = (20, 50, 20, 200)  # Semi-transparent dark green
+        theme.widget_font_size = 36
+        theme.title_font_size = 55
+        theme.title_background_color = (0, 120, 0, 220)
+        theme.background_color = (20, 60, 20, 180)
         theme.widget_font_color = (255, 255, 255)
         
         # Enhanced UI with custom colors and styling
         theme.title_font_shadow = True
         theme.title_font_shadow_color = (0, 0, 0)
-        theme.title_font_shadow_offset = 2
+        theme.title_font_shadow_offset = 3
         theme.widget_font_shadow = True
         theme.widget_font_shadow_color = (0, 0, 0)
         theme.widget_font_shadow_offset = 2
-        theme.widget_margin = (0, 10)
-        theme.widget_padding = 10
+        theme.widget_margin = (0, 15)
+        theme.widget_padding = 15
         
         self.victory_menu = pygame_menu.Menu(
             'LEVEL COMPLETE!', 
@@ -209,31 +247,44 @@ class UI:
             onclose=pygame_menu.events.CLOSE
         )
         
-        # Add a decorative trophy icon
-        self.victory_menu.add.label('🏆', font_size=80, font_color=(255, 215, 0))
+        # Add a decorative trophy icon with glow effect
+        self.victory_menu.add.label('🏆', font_size=100, font_color=(255, 215, 0))
+        self.victory_menu.add.vertical_margin(15)
+        
+        # Add a decorative separator
+        self.victory_menu.add.label('★ ★ ★', font_size=24, font_color=(255, 255, 100))
         self.victory_menu.add.vertical_margin(10)
         
-        # Add time display
+        # Add time display with premium styling
         self.victory_time_label = self.victory_menu.add.label(
-            'Your Time: 00:00.000', font_size=36, font_color=(255, 255, 0))
+            'Your Time: 00:00.000', font_size=40, font_color=(255, 255, 100))
+        
         self.victory_best_label = self.victory_menu.add.label(
-            'Best Time: 00:00.000', font_size=36, font_color=(255, 215, 0))
+            'Best Time: 00:00.000', font_size=40, font_color=(255, 215, 0))
         
-        self.victory_menu.add.vertical_margin(20)
+        self.victory_menu.add.vertical_margin(25)
         
-        # Add buttons directly without frames
-        self.victory_menu.add.button('NEXT LEVEL', self.next_level, font_size=36,
-                                   background_color=(0, 100, 0))
-        self.victory_menu.add.vertical_margin(10)
-        self.victory_menu.add.button('RETRY LEVEL', self.restart_level, font_size=36,
-                                   background_color=(0, 0, 100))
-        self.victory_menu.add.vertical_margin(10)
-        self.victory_menu.add.button('QUIT TO MENU', self.quit_to_menu, font_size=36,
-                                   background_color=(100, 0, 0))
+        # Add buttons with premium styling
+        next_button = self.victory_menu.add.button('NEXT LEVEL', self.next_level, font_size=40)
+        next_button.set_background_color((0, 120, 0))
+        next_button.set_border(3, (0, 255, 0))
         
-        # Add keyboard shortcut hints
-        self.victory_menu.add.vertical_margin(20)
-        self.victory_menu.add.label('N: Next Level   R: Retry   ESC: Quit to Menu', font_size=20, font_color=(200, 200, 200))
+        self.victory_menu.add.vertical_margin(15)
+        
+        retry_button = self.victory_menu.add.button('RETRY LEVEL', self.restart_level, font_size=40)
+        retry_button.set_background_color((0, 0, 150))
+        retry_button.set_border(3, (0, 150, 255))
+        
+        self.victory_menu.add.vertical_margin(15)
+        
+        quit_button = self.victory_menu.add.button('QUIT TO MENU', self.quit_to_menu, font_size=40)
+        quit_button.set_background_color((150, 0, 0))
+        quit_button.set_border(3, (255, 0, 0))
+        
+        # Add keyboard shortcut hints with improved styling
+        self.victory_menu.add.vertical_margin(25)
+        self.victory_menu.add.label('N: Next Level   R: Retry   ESC: Quit to Menu', 
+                                   font_size=22, font_color=(200, 255, 200))
     
     # Menu callback placeholders - these will be overridden by the game class
     def start_game(self):
@@ -275,45 +326,92 @@ class UI:
         self.powerup_display_time = pygame.time.get_ticks()
     
     def draw_hud(self, lives, current_level):
-        """Draw the HUD (heads-up display)"""
-        # Create a semi-transparent HUD background
-        hud_surface = pygame.Surface((WIDTH, 100), pygame.SRCALPHA)
-        hud_surface.fill((0, 0, 0, 128))  # Semi-transparent black
+        """Draw the HUD (heads-up display) with premium styling"""
+        # Create a semi-transparent HUD background with gradient effect
+        hud_height = 70
+        hud_surface = pygame.Surface((WIDTH, hud_height), pygame.SRCALPHA)
+        
+        # Create gradient background for HUD
+        for y in range(hud_height):
+            alpha = max(180 - y * 2, 50)  # Fade from top to bottom
+            pygame.draw.line(hud_surface, (0, 0, 30, alpha), (0, y), (WIDTH, y))
+            
+        # Add decorative border at the bottom
+        pygame.draw.line(hud_surface, (100, 150, 255, 150), (0, hud_height-1), (WIDTH, hud_height-1), 2)
+        
         self.screen.blit(hud_surface, (0, 0))
         
-        # Draw lives with heart icons
-        lives_text = self.font_medium.render("Lives:", True, WHITE)
-        self.screen.blit(lives_text, (20, 20))
+        # Draw lives with animated heart icons
+        lives_text = self.font_medium.render("LIVES:", True, (220, 220, 255))
+        self.screen.blit(lives_text, (20, 15))
+        
+        heart_time = pygame.time.get_ticks() // 500  # For pulsing effect
+        heart_scale = 1.0 + 0.1 * math.sin(heart_time % 2 * math.pi)
         
         for i in range(lives):
-            # Draw a heart
-            heart_pos = (lives_text.get_width() + 40 + i * 40, 20)
-            self.draw_heart(heart_pos)
+            # Draw a heart with pulsing effect
+            heart_pos = (lives_text.get_width() + 40 + i * 40, 15)
+            self.draw_heart(heart_pos, scale=heart_scale)
         
-        # Draw level with a fancy border
-        level_text = self.font_medium.render(f"Level {current_level}", True, YELLOW)
+        # Draw level with a fancy border and glow effect
+        level_text = self.font_medium.render(f"LEVEL {current_level}", True, (255, 255, 100))
         level_rect = level_text.get_rect(center=(WIDTH // 2, 30))
         
-        # Draw border
-        border_rect = level_rect.inflate(20, 10)
-        pygame.draw.rect(self.screen, BLUE, border_rect, border_radius=5)
-        pygame.draw.rect(self.screen, LIGHT_BLUE, border_rect, 2, border_radius=5)
+        # Draw glowing border
+        glow_color = (0, 100, 255)
+        border_rect = level_rect.inflate(30, 15)
+        pygame.draw.rect(self.screen, glow_color, border_rect, border_radius=8)
+        pygame.draw.rect(self.screen, (100, 200, 255), border_rect, 2, border_radius=8)
         
-        # Draw level text
+        # Add inner border for depth
+        inner_rect = border_rect.inflate(-6, -6)
+        pygame.draw.rect(self.screen, (0, 50, 100), inner_rect, 1, border_radius=6)
+        
+        # Draw level text with shadow
+        shadow_rect = level_rect.move(2, 2)
+        shadow_text = self.font_medium.render(f"LEVEL {current_level}", True, (0, 0, 0))
+        self.screen.blit(shadow_text, shadow_rect)
         self.screen.blit(level_text, level_rect)
         
-        # Draw timer with a fancy display
+        # Draw timer with a premium display
         if self.is_timer_running:
             self.current_time = pygame.time.get_ticks() - self.timer_start - self.paused_time
-            timer_text = self.font_medium.render(f"Time: {self.format_time(self.current_time)}", True, WHITE)
-            timer_rect = timer_text.get_rect(topright=(WIDTH - 20, 20))
+            timer_text = self.font_medium.render(f"TIME: {self.format_time(self.current_time)}", True, (220, 220, 255))
+            timer_rect = timer_text.get_rect(topright=(WIDTH - 20, 15))
             
-            # Draw timer background
-            timer_bg_rect = timer_rect.inflate(20, 10)
-            pygame.draw.rect(self.screen, (50, 50, 50, 180), timer_bg_rect, border_radius=5)
-            pygame.draw.rect(self.screen, (100, 100, 100), timer_bg_rect, 2, border_radius=5)
+            # Draw timer background with gradient
+            timer_bg_rect = timer_rect.inflate(30, 15)
+            timer_surface = pygame.Surface((timer_bg_rect.width, timer_bg_rect.height), pygame.SRCALPHA)
             
+            for y in range(timer_bg_rect.height):
+                alpha = 150 - y
+                pygame.draw.line(timer_surface, (0, 0, 100, max(alpha, 50)), 
+                                (0, y), (timer_bg_rect.width, y))
+                
+            pygame.draw.rect(timer_surface, (0, 0, 0, 0), (0, 0, timer_bg_rect.width, timer_bg_rect.height), 
+                            border_radius=8)
+            pygame.draw.rect(timer_surface, (100, 150, 255, 200), (0, 0, timer_bg_rect.width, timer_bg_rect.height), 
+                            2, border_radius=8)
+            
+            self.screen.blit(timer_surface, timer_bg_rect)
+            
+            # Draw timer text with shadow
+            shadow_rect = timer_rect.move(2, 2)
+            shadow_text = self.font_medium.render(f"TIME: {self.format_time(self.current_time)}", True, (0, 0, 0))
+            self.screen.blit(shadow_text, shadow_rect)
             self.screen.blit(timer_text, timer_rect)
+            
+            # Draw best time if available
+            best_time = self.get_best_time(current_level)
+            if best_time:
+                best_text = self.font_small.render(f"BEST: {self.format_time(best_time)}", True, (255, 255, 100))
+                best_rect = best_text.get_rect(topright=(WIDTH - 20, 45))
+                
+                # Draw shadow
+                shadow_rect = best_rect.move(1, 1)
+                shadow_text = self.font_small.render(f"BEST: {self.format_time(best_time)}", True, (0, 0, 0))
+                self.screen.blit(shadow_text, shadow_rect)
+                self.screen.blit(best_text, best_rect)
         
         # Draw powerup notification if active
         current_time = pygame.time.get_ticks()
@@ -325,31 +423,55 @@ class UI:
                 alpha = 255 * (1 - (current_time - self.powerup_display_time - (self.powerup_duration - 1000)) / 1000)
             
             # Create notification text with pulsing effect
-            size = 40
+            pulse = math.sin(current_time / 150) * 0.1 + 1.0
+            size = int(45 * pulse)
             powerup_font = pygame.font.Font(None, size)
             
             powerup_text = powerup_font.render(self.powerup_message, True, (255, 255, 0))
             powerup_text.set_alpha(int(alpha))
             
-            # Create a background for better visibility
+            # Create a background with glow effect
             text_rect = powerup_text.get_rect(center=(WIDTH // 2, HEIGHT // 4))
-            bg_rect = text_rect.inflate(40, 20)
+            bg_rect = text_rect.inflate(60, 30)
+            
+            # Draw multiple layers for glow effect
+            for i in range(3):
+                glow_surf = pygame.Surface((bg_rect.width + i*10, bg_rect.height + i*10), pygame.SRCALPHA)
+                glow_color = (255, 165, 0, max(0, int(alpha * 0.3) - i*30))
+                pygame.draw.rect(glow_surf, glow_color, 
+                                (0, 0, bg_rect.width + i*10, bg_rect.height + i*10), 
+                                border_radius=15)
+                self.screen.blit(glow_surf, bg_rect.inflate(i*10, i*10))
+            
+            # Draw main background
             bg_surface = pygame.Surface((bg_rect.width, bg_rect.height), pygame.SRCALPHA)
             bg_surface.fill((0, 0, 0, int(alpha * 0.7)))
+            pygame.draw.rect(bg_surface, (255, 165, 0, int(alpha * 0.9)), 
+                            (0, 0, bg_rect.width, bg_rect.height), 2, border_radius=10)
             
-            # Draw background and text
             self.screen.blit(bg_surface, bg_rect)
             self.screen.blit(powerup_text, text_rect)
     
-    def draw_heart(self, pos):
-        """Draw a heart icon for lives"""
+    def get_best_time(self, level):
+        """Get the best time for the current level"""
+        # This is a placeholder - in a real implementation, you would load this from a file
+        # For now, just return a fixed value for demonstration
+        return 45000  # 45 seconds
+    
+    def draw_heart(self, pos, scale=1.0):
+        """Draw a heart icon for lives with optional scaling for animation"""
         x, y = pos
-        size = 24
+        size = int(24 * scale)
         
-        # Draw a simple heart shape
+        # Draw a heart shape with gradient and glow
         heart_color = (255, 0, 0)  # Red
+        heart_glow = (255, 100, 100)  # Light red
         
         # Draw the two circles for the top of the heart
+        pygame.draw.circle(self.screen, heart_glow, (x + size//4, y + size//4), size//4 + 1)
+        pygame.draw.circle(self.screen, heart_glow, (x + size - size//4, y + size//4), size//4 + 1)
+        
+        # Draw the main heart shape
         pygame.draw.circle(self.screen, heart_color, (x + size//4, y + size//4), size//4)
         pygame.draw.circle(self.screen, heart_color, (x + size - size//4, y + size//4), size//4)
         
@@ -359,6 +481,9 @@ class UI:
             (x + size//2, y + size),
             (x + size, y + size//4)
         ])
+        
+        # Add highlight for 3D effect
+        pygame.draw.circle(self.screen, (255, 150, 150), (x + size//4 - 2, y + size//4 - 2), size//8)
     
     def start_timer(self):
         """Start the game timer"""

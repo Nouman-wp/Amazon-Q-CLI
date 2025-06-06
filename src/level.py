@@ -222,11 +222,10 @@ class Level:
         # Create hazards throughout the level
         # Section 1 hazards
         Hazard((300, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
-        Hazard((600, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
+        Hazard((600, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
         Hazard((900, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
-        Hazard((1200, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
         
-        # Add hazards in the gaps
+        # Add lava hazards in the gaps - properly positioned at ground level
         for x in range(1000, 1100, TILE_SIZE):
             Hazard((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
         
@@ -235,19 +234,19 @@ class Level:
             
         # Section 2 hazards
         Hazard((WIDTH * 3 + 300, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
-        Hazard((WIDTH * 3 + 600, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
+        Hazard((WIDTH * 3 + 600, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
         Hazard((WIDTH * 3 + 900, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
         
-        # Add hazards below air blocks to punish missed jumps
+        # Add lava hazards below air blocks to punish missed jumps
         for x in range(WIDTH * 3 + 1100, WIDTH * 3 + 1600, TILE_SIZE * 2):
             Hazard((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
             
         # Section 3 hazards
         Hazard((WIDTH * 6 + 500, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
-        Hazard((WIDTH * 6 + 800, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
+        Hazard((WIDTH * 6 + 800, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
         Hazard((WIDTH * 6 + 1100, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
         
-        # Add hazards in the final gaps
+        # Add lava hazards in the final gaps
         for x in range(6200, 6400, TILE_SIZE):
             Hazard((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
             
@@ -328,8 +327,8 @@ class Level:
         # Update player
         self.player.update(elapsed_time)
         
-        # Update ghost
-        self.ghost.update(elapsed_time)
+        # Update ghost - disable ghost shadow
+        # self.ghost.update(elapsed_time)
         
         # Update enemies
         for enemy in self.enemy_sprites:
@@ -338,6 +337,11 @@ class Level:
         # Update power-ups
         for powerup in self.powerup_sprites:
             powerup.update()
+        
+        # Update hazards (for animation)
+        for hazard in self.hazard_sprites:
+            if hasattr(hazard, 'update'):
+                hazard.update()
         
         # Update moving platforms
         for sprite in self.collision_sprites:
@@ -419,56 +423,103 @@ class Level:
     
     def draw(self):
         """Draw all level elements with camera offset"""
-        # Fill background with a gradient sky
+        # Fill background with a gradient sky - draw this first to cover everything
         self.draw_background()
         
         # Draw all sprites with camera offset
-        for sprite in self.all_sprites:
+        for sprite in sorted(self.all_sprites, key=lambda s: 1 if isinstance(s, Player) else 0):
             offset_pos = sprite.rect.topleft + self.camera_offset
             self.display_surface.blit(sprite.image, offset_pos)
     
     def draw_background(self):
-        """Draw a gradient background with clouds"""
+        """Draw a gradient background with mountains and clouds that fills the entire screen"""
         # Create a gradient from blue to light blue
         height = self.display_surface.get_height()
         width = self.display_surface.get_width()
         
-        # Sky gradient
-        for y in range(0, height // 2):
+        # Fill the entire screen with sky gradient - ensure it covers everything
+        for y in range(0, height):
             # Calculate color based on height
             # Top is darker blue, gradually becoming lighter
-            r = int(100 + (y / (height // 2)) * 73)
-            g = int(150 + (y / (height // 2)) * 66)
+            r = int(80 + (y / height) * 100)
+            g = int(120 + (y / height) * 80)
             b = int(235)
             
             pygame.draw.line(self.display_surface, (r, g, b), (0, y), (width, y))
+        
+        # Draw distant mountains in the background with better detail
+        # Far mountains (bluish)
+        self.draw_mountain_range(width, height, 0.7, (70, 90, 120), 5, 0.3, 0.2)
+        
+        # Mid mountains (darker blue-green)
+        self.draw_mountain_range(width, height, 0.75, (60, 80, 100), 4, 0.4, 0.25)
+        
+        # Near mountains (darkest)
+        self.draw_mountain_range(width, height, 0.8, (50, 70, 80), 3, 0.5, 0.3)
         
         # Draw clouds
         # Use a deterministic approach based on game time to create moving clouds
         cloud_time = pygame.time.get_ticks() // 50  # Slow cloud movement
         
         # Draw several clouds at different heights and sizes
-        self.draw_cloud(width * 0.1 - (cloud_time % width) * 0.02, height * 0.1, 60, 30)
-        self.draw_cloud(width * 0.5 - (cloud_time % width) * 0.015, height * 0.15, 80, 40)
-        self.draw_cloud(width * 0.8 - (cloud_time % width) * 0.01, height * 0.05, 70, 35)
-        self.draw_cloud(width * 0.3 - (cloud_time % width) * 0.025, height * 0.2, 90, 45)
+        for i in range(10):  # More clouds for better coverage
+            x_pos = (width * (i * 0.12) - (cloud_time % (width * 2)) * 0.01) % (width * 1.2) - width * 0.1
+            y_pos = height * (0.05 + (i % 4) * 0.08)
+            cloud_size = 60 + (i % 5) * 20
+            self.draw_cloud(x_pos, y_pos, cloud_size, cloud_size / 2)
         
-        # Draw sun
-        sun_x = width * 0.8
+        # Draw sun with improved glow effect
+        sun_x = width * 0.85
         sun_y = height * 0.15
-        sun_radius = 40
+        sun_radius = 45
         
-        # Draw sun glow
-        for i in range(5, 0, -1):
-            alpha = 100 - i * 15
+        # Draw sun glow with more layers for better effect
+        for i in range(8, 0, -1):
+            alpha = 120 - i * 12
             color = (255, 255, 200, alpha)
             glow_surf = pygame.Surface((sun_radius * 2 * i, sun_radius * 2 * i), pygame.SRCALPHA)
             pygame.draw.circle(glow_surf, color, (sun_radius * i, sun_radius * i), sun_radius * i)
             self.display_surface.blit(glow_surf, (sun_x - sun_radius * i, sun_y - sun_radius * i))
         
-        # Draw sun body
+        # Draw sun body with gradient effect
         pygame.draw.circle(self.display_surface, (255, 255, 200), (sun_x, sun_y), sun_radius)
         pygame.draw.circle(self.display_surface, (255, 255, 100), (sun_x, sun_y), sun_radius - 5)
+        pygame.draw.circle(self.display_surface, (255, 255, 50), (sun_x, sun_y), sun_radius - 15)
+    
+    def draw_mountain_range(self, width, height, horizon, color, count, height_factor, width_factor):
+        """Draw a range of mountains with the given parameters"""
+        horizon_y = height * horizon
+        
+        for i in range(count):
+            # Calculate mountain position and size
+            mountain_height = height * height_factor * (0.8 + 0.4 * math.sin(i * 1.5))
+            mountain_width = width * width_factor
+            mountain_x = width * ((i * 0.8 / count) + 0.1) % 1.0
+            
+            # Create points for the mountain
+            points = [
+                (mountain_x - mountain_width, horizon_y),
+                (mountain_x, horizon_y - mountain_height),
+                (mountain_x + mountain_width, horizon_y)
+            ]
+            
+            # Draw the mountain
+            pygame.draw.polygon(self.display_surface, color, points)
+            
+            # Add some detail/shading to the mountain
+            lighter_color = (
+                min(color[0] + 20, 255),
+                min(color[1] + 20, 255),
+                min(color[2] + 20, 255)
+            )
+            
+            # Draw a highlight on one side
+            highlight_points = [
+                (mountain_x, horizon_y - mountain_height),
+                (mountain_x - mountain_width * 0.8, horizon_y - mountain_height * 0.2),
+                (mountain_x - mountain_width, horizon_y)
+            ]
+            pygame.draw.polygon(self.display_surface, lighter_color, highlight_points)
     
     def draw_cloud(self, x, y, width, height):
         """Draw a fluffy cloud"""
