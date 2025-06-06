@@ -109,8 +109,8 @@ class Level:
     
     def create_test_level(self):
         """Create a simple test level if no TMX file is available"""
-        # Create a much longer level (3x the screen width)
-        level_width = WIDTH * 3
+        # Create a much longer level (9x the screen width - 3 times longer than before)
+        level_width = WIDTH * 9
         
         # Create a solid floor that extends beyond the screen
         # First create a boundary at the bottom to prevent anything from falling through
@@ -119,17 +119,24 @@ class Level:
             boundary = Tile((x, HEIGHT), TILE_SIZE, [self.collision_sprites], 'invisible')
             boundary.rect.height = TILE_SIZE * 10  # Make it very tall to catch everything
         
-        # Create ground for the entire level - fill the bottom completely
+        # Create ground for the entire level with gaps for jumping challenges
         for x in range(-TILE_SIZE * 10, level_width + TILE_SIZE * 10, TILE_SIZE):
-            # Create the top grass layer
-            ground_tile = Tile((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.collision_sprites], 'grass')
-            
-            # Fill in dirt blocks below the grass to prevent void
-            for y in range(HEIGHT, HEIGHT + TILE_SIZE * 10, TILE_SIZE):
-                Tile((x, y), TILE_SIZE, [self.all_sprites, self.collision_sprites], 'dirt')
+            # Create gaps in the ground at specific intervals for jumping challenges
+            if not (1000 <= x <= 1100 or 
+                    2200 <= x <= 2350 or 
+                    3500 <= x <= 3650 or 
+                    4800 <= x <= 5000 or 
+                    6200 <= x <= 6400 or 
+                    7500 <= x <= 7700):
+                # Create the top grass layer
+                ground_tile = Tile((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.collision_sprites], 'grass')
+                
+                # Fill in dirt blocks below the grass to prevent void
+                for y in range(HEIGHT, HEIGHT + TILE_SIZE * 10, TILE_SIZE):
+                    Tile((x, y), TILE_SIZE, [self.all_sprites, self.collision_sprites], 'dirt')
         
+        # SECTION 1 - First third of the level
         # Create platforms throughout the level
-        # First section
         platform1_y = HEIGHT - 180
         for x in range(200, 400, TILE_SIZE):
             Tile((x, platform1_y), TILE_SIZE, [self.all_sprites, self.collision_sprites])
@@ -137,56 +144,157 @@ class Level:
         platform2_y = HEIGHT - 260
         for x in range(500, 700, TILE_SIZE):
             Tile((x, platform2_y), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+            
+        # Add floating platforms for the first gap
+        gap1_platforms = [
+            (950, HEIGHT - 150),
+            (1050, HEIGHT - 150),
+            (1150, HEIGHT - 150)
+        ]
+        for pos in gap1_platforms:
+            Tile(pos, TILE_SIZE, [self.all_sprites, self.collision_sprites])
+            
+        # Add staggered jumping platforms
+        stair_y = HEIGHT - 200
+        for i in range(5):
+            Tile((1300 + i * 70, stair_y - i * 40), TILE_SIZE, [self.all_sprites, self.collision_sprites])
         
-        # Middle section
-        platform3_y = HEIGHT - 200
-        for x in range(WIDTH + 100, WIDTH + 300, TILE_SIZE):
-            Tile((x, platform3_y), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+        # Add a moving platform
+        MovingPlatform((1700, HEIGHT - 250), TILE_SIZE, [self.all_sprites, self.collision_sprites], 200, 2, 'horizontal')
         
-        platform4_y = HEIGHT - 300
-        for x in range(WIDTH + 400, WIDTH + 700, TILE_SIZE):
-            Tile((x, platform4_y), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+        # SECTION 2 - Middle third of the level
+        # Create more complex platform arrangements
+        # Zigzag platforms
+        zigzag_base_y = HEIGHT - 200
+        for i in range(6):
+            offset = 0 if i % 2 == 0 else 80
+            platform_width = 3 * TILE_SIZE
+            for j in range(platform_width // TILE_SIZE):
+                Tile((WIDTH * 3 + 100 + i * 150 + j * TILE_SIZE + offset, zigzag_base_y - i * 50), 
+                     TILE_SIZE, [self.all_sprites, self.collision_sprites])
         
-        # Final section
-        platform5_y = HEIGHT - 220
-        for x in range(WIDTH * 2, WIDTH * 2 + 300, TILE_SIZE):
-            Tile((x, platform5_y), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+        # Add floating single blocks for precise jumping
+        air_blocks = [
+            (WIDTH * 3 + 1100, HEIGHT - 300),
+            (WIDTH * 3 + 1200, HEIGHT - 350),
+            (WIDTH * 3 + 1300, HEIGHT - 400),
+            (WIDTH * 3 + 1400, HEIGHT - 350),
+            (WIDTH * 3 + 1500, HEIGHT - 300)
+        ]
+        for pos in air_blocks:
+            Tile(pos, TILE_SIZE, [self.all_sprites, self.collision_sprites])
         
-        platform6_y = HEIGHT - 350
-        for x in range(WIDTH * 2 + 400, WIDTH * 2 + 800, TILE_SIZE):
-            Tile((x, platform6_y), TILE_SIZE, [self.all_sprites, self.collision_sprites])
+        # Add a series of moving platforms
+        MovingPlatform((WIDTH * 3 + 1700, HEIGHT - 250), TILE_SIZE, [self.all_sprites, self.collision_sprites], 150, 3, 'vertical')
+        MovingPlatform((WIDTH * 3 + 1900, HEIGHT - 300), TILE_SIZE, [self.all_sprites, self.collision_sprites], 200, 2, 'horizontal')
+        MovingPlatform((WIDTH * 3 + 2200, HEIGHT - 350), TILE_SIZE, [self.all_sprites, self.collision_sprites], 150, 3, 'vertical')
+        
+        # SECTION 3 - Final third of the level
+        # Create an advanced obstacle course
+        # Alternating platforms at different heights
+        for i in range(8):
+            height_offset = 250 if i % 2 == 0 else 350
+            platform_width = 2 * TILE_SIZE
+            for j in range(platform_width // TILE_SIZE):
+                Tile((WIDTH * 6 + 300 + i * 200 + j * TILE_SIZE, HEIGHT - height_offset), 
+                     TILE_SIZE, [self.all_sprites, self.collision_sprites])
+        
+        # Create a challenging jumping section with small platforms
+        jump_challenge = [
+            (WIDTH * 6 + 2000, HEIGHT - 200),
+            (WIDTH * 6 + 2100, HEIGHT - 250),
+            (WIDTH * 6 + 2200, HEIGHT - 300),
+            (WIDTH * 6 + 2300, HEIGHT - 350),
+            (WIDTH * 6 + 2400, HEIGHT - 400),
+            (WIDTH * 6 + 2500, HEIGHT - 350),
+            (WIDTH * 6 + 2600, HEIGHT - 300),
+            (WIDTH * 6 + 2700, HEIGHT - 250),
+            (WIDTH * 6 + 2800, HEIGHT - 200)
+        ]
+        for pos in jump_challenge:
+            Tile(pos, TILE_SIZE, [self.all_sprites, self.collision_sprites])
+        
+        # Final approach with moving platforms and hazards
+        MovingPlatform((WIDTH * 8, HEIGHT - 250), TILE_SIZE, [self.all_sprites, self.collision_sprites], 100, 4, 'vertical')
+        MovingPlatform((WIDTH * 8 + 200, HEIGHT - 300), TILE_SIZE, [self.all_sprites, self.collision_sprites], 150, 3, 'horizontal')
+        MovingPlatform((WIDTH * 8 + 400, HEIGHT - 350), TILE_SIZE, [self.all_sprites, self.collision_sprites], 100, 5, 'vertical')
         
         # Create hazards throughout the level
+        # Section 1 hazards
         Hazard((300, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
         Hazard((600, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
-        Hazard((WIDTH + 200, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
-        Hazard((WIDTH + 500, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
-        Hazard((WIDTH * 2 + 300, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
+        Hazard((900, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
+        Hazard((1200, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
+        
+        # Add hazards in the gaps
+        for x in range(1000, 1100, TILE_SIZE):
+            Hazard((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
+        
+        for x in range(2200, 2350, TILE_SIZE):
+            Hazard((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
+            
+        # Section 2 hazards
+        Hazard((WIDTH * 3 + 300, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
+        Hazard((WIDTH * 3 + 600, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
+        Hazard((WIDTH * 3 + 900, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
+        
+        # Add hazards below air blocks to punish missed jumps
+        for x in range(WIDTH * 3 + 1100, WIDTH * 3 + 1600, TILE_SIZE * 2):
+            Hazard((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
+            
+        # Section 3 hazards
+        Hazard((WIDTH * 6 + 500, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
+        Hazard((WIDTH * 6 + 800, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
+        Hazard((WIDTH * 6 + 1100, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'spike')
+        
+        # Add hazards in the final gaps
+        for x in range(6200, 6400, TILE_SIZE):
+            Hazard((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
+            
+        for x in range(7500, 7700, TILE_SIZE):
+            Hazard((x, HEIGHT - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.hazard_sprites], 'lava')
         
         # Create enemies throughout the level
+        # Section 1 enemies
         Enemy((400, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
         Enemy((800, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
-        Enemy((WIDTH + 300, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
-        Enemy((WIDTH + 600, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'flying')
-        Enemy((WIDTH * 2 + 200, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
-        Enemy((WIDTH * 2 + 500, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'jumping')
-        Enemy((WIDTH * 2 + 700, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
+        Enemy((1500, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 150, 'jumping')
+        Enemy((1800, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'flying')
         
-        # Create power-ups throughout the level - FIXED: Place them directly ON platforms
-        # First section powerups
+        # Section 2 enemies
+        Enemy((WIDTH * 3 + 300, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
+        Enemy((WIDTH * 3 + 700, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 150, 'jumping')
+        Enemy((WIDTH * 3 + 1000, HEIGHT - 350), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'flying')
+        Enemy((WIDTH * 3 + 1600, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
+        Enemy((WIDTH * 3 + 2000, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 150, 'jumping')
+        
+        # Section 3 enemies
+        Enemy((WIDTH * 6 + 400, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
+        Enemy((WIDTH * 6 + 900, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 150, 'jumping')
+        Enemy((WIDTH * 6 + 1300, HEIGHT - 300), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'flying')
+        Enemy((WIDTH * 6 + 1800, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'basic')
+        Enemy((WIDTH * 6 + 2200, HEIGHT - 400), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 100, 'flying')
+        Enemy((WIDTH * 6 + 2600, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.enemy_sprites], 150, 'jumping')
+        
+        # Create power-ups throughout the level
+        # Section 1 powerups
         PowerUp((250, platform1_y - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
         PowerUp((550, platform2_y - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
+        PowerUp((1050, HEIGHT - 180), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
+        PowerUp((1500, stair_y - 200), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
         
-        # Middle section powerups
-        PowerUp((WIDTH + 150, platform3_y - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
-        PowerUp((WIDTH + 650, platform4_y - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
+        # Section 2 powerups
+        PowerUp((WIDTH * 3 + 250, zigzag_base_y - 50), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
+        PowerUp((WIDTH * 3 + 1300, HEIGHT - 430), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
+        PowerUp((WIDTH * 3 + 1900, HEIGHT - 330), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
         
-        # Final section powerups
-        PowerUp((WIDTH * 2 + 350, platform5_y - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
-        PowerUp((WIDTH * 2 + 700, platform6_y - TILE_SIZE), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
+        # Section 3 powerups
+        PowerUp((WIDTH * 6 + 400, HEIGHT - 280), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'speed', self.collision_sprites)
+        PowerUp((WIDTH * 6 + 2400, HEIGHT - 430), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
+        PowerUp((WIDTH * 8 + 200, HEIGHT - 330), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
         
         # Create finish flag at the end of the extended level
-        FinishFlag((WIDTH * 3 - 100, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.finish_sprites])
+        FinishFlag((WIDTH * 9 - 100, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.finish_sprites])
         
         # Create player - fixed the argument order to match Player.__init__
         self.player = Player(100, HEIGHT - 200, [self.all_sprites], self.collision_sprites)
