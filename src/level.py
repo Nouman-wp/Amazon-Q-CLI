@@ -608,9 +608,9 @@ class Level:
         PowerUp((WIDTH * 8 + 200, HEIGHT - 330), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
         
         # Add checkpoints at strategic locations
-        # First checkpoint - after the first section
-        checkpoint1 = Checkpoint((WIDTH * 2, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.checkpoint_sprites])
-        self.checkpoint_positions.append((WIDTH * 2, HEIGHT - TILE_SIZE * 2))
+        # First checkpoint - after the first section (moved to safe ground)
+        checkpoint1 = Checkpoint((WIDTH * 2 - 200, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.checkpoint_sprites])
+        self.checkpoint_positions.append((WIDTH * 2 - 200, HEIGHT - TILE_SIZE * 2))
         
         # Second checkpoint - after the second section (on safe ground)
         checkpoint2 = Checkpoint((WIDTH * 5 + 800, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.checkpoint_sprites])
