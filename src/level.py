@@ -20,6 +20,82 @@ except ImportError:
     PYTMX_AVAILABLE = False
     print("Warning: pytmx module not found. Using fallback level creation.")
 
+class Checkpoint(pygame.sprite.Sprite):
+    def __init__(self, pos, size, groups):
+        super().__init__(groups)
+        self.image = pygame.Surface((size, size * 2), pygame.SRCALPHA)
+        
+        # Create a checkpoint flag
+        FLAG_COLOR = (0, 255, 255)    # Cyan
+        POLE_COLOR = (200, 200, 200)  # Silver
+        
+        # Draw the pole
+        pygame.draw.rect(self.image, POLE_COLOR, (size//2 - 2, 0, 4, size * 2))
+        
+        # Draw the flag
+        flag_points = [
+            (size//2, size//4),
+            (size - 4, size//2),
+            (size//2, size * 3//4)
+        ]
+        pygame.draw.polygon(self.image, FLAG_COLOR, flag_points)
+        
+        # Add a base
+        pygame.draw.rect(self.image, POLE_COLOR, (size//4, size * 2 - 8, size//2, 8))
+        
+        # Add some details to the flag
+        pygame.draw.circle(self.image, (255, 255, 255), (size * 3//4, size//2), size//8)
+        
+        # Add a glowing effect
+        glow_surf = pygame.Surface((size * 2, size * 2), pygame.SRCALPHA)
+        pygame.draw.circle(glow_surf, (0, 255, 255, 50), (size, size), size)
+        self.image.blit(glow_surf, (-size//2, 0))
+        
+        self.rect = self.image.get_rect(bottomleft=pos)
+        self.activated = False
+        self.position = pos
+        
+        # Animation variables
+        self.frame = 0
+        self.animation_speed = 0.1
+        self.wave_amplitude = 2
+        
+    def update(self):
+        # Make the flag wave
+        self.frame += self.animation_speed
+        wave = math.sin(self.frame) * self.wave_amplitude
+        
+        # We could update the flag's appearance here to make it wave
+        # For now, we'll just move it slightly
+        self.rect.y = self.rect.y + round(wave)
+        
+    def activate(self):
+        self.activated = True
+        # Change color to indicate activation
+        if self.activated:
+            # Redraw the flag in gold color
+            size = self.rect.width
+            FLAG_COLOR = (255, 215, 0)  # Gold
+            
+            # Clear the flag portion
+            pygame.draw.rect(self.image, (0, 0, 0, 0), (size//2, size//4, size//2, size//2))
+            
+            # Redraw the flag
+            flag_points = [
+                (size//2, size//4),
+                (size - 4, size//2),
+                (size//2, size * 3//4)
+            ]
+            pygame.draw.polygon(self.image, FLAG_COLOR, flag_points)
+            
+            # Add some details to the flag
+            pygame.draw.circle(self.image, (255, 255, 255), (size * 3//4, size//2), size//8)
+            
+            # Add a stronger glowing effect
+            glow_surf = pygame.Surface((size * 2, size * 2), pygame.SRCALPHA)
+            pygame.draw.circle(glow_surf, (255, 215, 0, 80), (size, size), size)
+            self.image.blit(glow_surf, (-size//2, 0))
+
 class Level:
     def __init__(self, level_name, surface):
         # Setup
@@ -37,6 +113,7 @@ class Level:
         self.enemy_sprites = pygame.sprite.Group()
         self.powerup_sprites = pygame.sprite.Group()
         self.finish_sprites = pygame.sprite.Group()
+        self.checkpoint_sprites = pygame.sprite.Group()
         
         # Player and ghost
         self.player = None
@@ -49,9 +126,12 @@ class Level:
         # UI reference for powerup notifications
         self.ui = None
         
+        # Checkpoint system
+        self.current_checkpoint = None
+        self.checkpoint_positions = []
+        
         # Load the level
         self.load_level()
-    
     def load_level(self):
         """Load level from TMX file or create a simple test level"""
         # Skip TMX loading for now and just create a test level
@@ -106,6 +186,9 @@ class Level:
                 distance = obj.properties.get('distance', 128)
                 speed = obj.properties.get('speed', 2)
                 MovingPlatform(pos, TILE_SIZE, [self.all_sprites, self.collision_sprites], distance, speed, direction)
+            elif obj.type == 'checkpoint':
+                checkpoint = Checkpoint(pos, TILE_SIZE, [self.all_sprites, self.checkpoint_sprites])
+                self.checkpoint_positions.append((pos[0], pos[1]))
     
     def create_test_level(self):
         """Create a simple test level if no TMX file is available"""
@@ -292,6 +375,15 @@ class Level:
         PowerUp((WIDTH * 6 + 2400, HEIGHT - 430), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'invincibility', self.collision_sprites)
         PowerUp((WIDTH * 8 + 200, HEIGHT - 330), TILE_SIZE, [self.all_sprites, self.powerup_sprites], 'extra_life', self.collision_sprites)
         
+        # Add checkpoints at strategic locations
+        # First checkpoint - after the first section
+        checkpoint1 = Checkpoint((WIDTH * 2, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.checkpoint_sprites])
+        self.checkpoint_positions.append((WIDTH * 2, HEIGHT - TILE_SIZE * 2))
+        
+        # Second checkpoint - after the second section
+        checkpoint2 = Checkpoint((WIDTH * 6, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.checkpoint_sprites])
+        self.checkpoint_positions.append((WIDTH * 6, HEIGHT - TILE_SIZE * 2))
+        
         # Create finish flag at the end of the extended level
         FinishFlag((WIDTH * 9 - 100, HEIGHT - TILE_SIZE * 2), TILE_SIZE, [self.all_sprites, self.finish_sprites])
         
@@ -343,6 +435,18 @@ class Level:
             if hasattr(hazard, 'update'):
                 hazard.update()
         
+        # Update checkpoints
+        for checkpoint in self.checkpoint_sprites:
+            checkpoint.update()
+            # Check if player has reached this checkpoint
+            if self.player.rect.colliderect(checkpoint.rect) and not checkpoint.activated:
+                checkpoint.activate()
+                self.current_checkpoint = checkpoint
+                print(f"Checkpoint activated at {checkpoint.position}")
+                # Show notification on UI
+                if self.ui:
+                    self.ui.show_powerup_notification("Checkpoint Reached!")
+        
         # Update moving platforms
         for sprite in self.collision_sprites:
             if isinstance(sprite, MovingPlatform):
@@ -377,9 +481,8 @@ class Level:
                     # Player takes damage
                     self.player.lives -= 1
                     print(f"Player hit by enemy! Lives left: {self.player.lives}")
-                    # Reset player position
-                    self.player.rect.x = 100
-                    self.player.rect.y = HEIGHT - 200
+                    # Reset player position to last checkpoint or start
+                    self.respawn_player()
                 break
         
         # Check hazard collisions
@@ -389,9 +492,8 @@ class Level:
                     # Player takes damage
                     self.player.lives -= 1
                     print(f"Player hit by hazard! Lives left: {self.player.lives}")
-                    # Reset player position
-                    self.player.rect.x = 100
-                    self.player.rect.y = HEIGHT - 200
+                    # Reset player position to last checkpoint or start
+                    self.respawn_player()
                 break
         
         # Check powerup collisions
@@ -421,18 +523,25 @@ class Level:
                 powerup.kill()
                 break
     
-    def draw(self):
-        """Draw all level elements with camera offset"""
-        # Fill background with a gradient sky - draw this first to cover everything
-        self.draw_background()
+    def respawn_player(self):
+        """Respawn the player at the last checkpoint or start position"""
+        if self.current_checkpoint:
+            # Respawn at checkpoint
+            self.player.rect.x = self.current_checkpoint.position[0]
+            self.player.rect.y = self.current_checkpoint.position[1] - TILE_SIZE * 2  # Adjust height to be above the ground
+            print(f"Player respawned at checkpoint: {self.current_checkpoint.position}")
+        else:
+            # Respawn at start
+            self.player.rect.x = 100
+            self.player.rect.y = HEIGHT - 200
+            print("Player respawned at start position")
         
-        # Draw all sprites with camera offset
-        for sprite in sorted(self.all_sprites, key=lambda s: 1 if isinstance(s, Player) else 0):
-            offset_pos = sprite.rect.topleft + self.camera_offset
-            self.display_surface.blit(sprite.image, offset_pos)
+        # Reset player velocity
+        self.player.direction.x = 0
+        self.player.direction.y = 0
     
     def draw_background(self):
-        """Draw a gradient background with mountains and clouds that fills the entire screen"""
+        """Draw a gradient background with clouds that fills the entire screen"""
         # Create a gradient from blue to light blue
         height = self.display_surface.get_height()
         width = self.display_surface.get_width()
@@ -447,24 +556,14 @@ class Level:
             
             pygame.draw.line(self.display_surface, (r, g, b), (0, y), (width, y))
         
-        # Draw distant mountains in the background with better detail
-        # Far mountains (bluish)
-        self.draw_mountain_range(width, height, 0.7, (70, 90, 120), 5, 0.3, 0.2)
-        
-        # Mid mountains (darker blue-green)
-        self.draw_mountain_range(width, height, 0.75, (60, 80, 100), 4, 0.4, 0.25)
-        
-        # Near mountains (darkest)
-        self.draw_mountain_range(width, height, 0.8, (50, 70, 80), 3, 0.5, 0.3)
-        
         # Draw clouds
         # Use a deterministic approach based on game time to create moving clouds
         cloud_time = pygame.time.get_ticks() // 50  # Slow cloud movement
         
         # Draw several clouds at different heights and sizes
-        for i in range(10):  # More clouds for better coverage
+        for i in range(12):  # More clouds for better coverage
             x_pos = (width * (i * 0.12) - (cloud_time % (width * 2)) * 0.01) % (width * 1.2) - width * 0.1
-            y_pos = height * (0.05 + (i % 4) * 0.08)
+            y_pos = height * (0.05 + (i % 5) * 0.08)
             cloud_size = 60 + (i % 5) * 20
             self.draw_cloud(x_pos, y_pos, cloud_size, cloud_size / 2)
         
@@ -485,41 +584,6 @@ class Level:
         pygame.draw.circle(self.display_surface, (255, 255, 200), (sun_x, sun_y), sun_radius)
         pygame.draw.circle(self.display_surface, (255, 255, 100), (sun_x, sun_y), sun_radius - 5)
         pygame.draw.circle(self.display_surface, (255, 255, 50), (sun_x, sun_y), sun_radius - 15)
-    
-    def draw_mountain_range(self, width, height, horizon, color, count, height_factor, width_factor):
-        """Draw a range of mountains with the given parameters"""
-        horizon_y = height * horizon
-        
-        for i in range(count):
-            # Calculate mountain position and size
-            mountain_height = height * height_factor * (0.8 + 0.4 * math.sin(i * 1.5))
-            mountain_width = width * width_factor
-            mountain_x = width * ((i * 0.8 / count) + 0.1) % 1.0
-            
-            # Create points for the mountain
-            points = [
-                (mountain_x - mountain_width, horizon_y),
-                (mountain_x, horizon_y - mountain_height),
-                (mountain_x + mountain_width, horizon_y)
-            ]
-            
-            # Draw the mountain
-            pygame.draw.polygon(self.display_surface, color, points)
-            
-            # Add some detail/shading to the mountain
-            lighter_color = (
-                min(color[0] + 20, 255),
-                min(color[1] + 20, 255),
-                min(color[2] + 20, 255)
-            )
-            
-            # Draw a highlight on one side
-            highlight_points = [
-                (mountain_x, horizon_y - mountain_height),
-                (mountain_x - mountain_width * 0.8, horizon_y - mountain_height * 0.2),
-                (mountain_x - mountain_width, horizon_y)
-            ]
-            pygame.draw.polygon(self.display_surface, lighter_color, highlight_points)
     
     def draw_cloud(self, x, y, width, height):
         """Draw a fluffy cloud"""
@@ -544,6 +608,16 @@ class Level:
         # Blit the cloud to the display surface
         self.display_surface.blit(cloud_surf, (x, y))
     
+    def draw(self):
+        """Draw all level elements with camera offset"""
+        # Fill background with a gradient sky - draw this first to cover everything
+        self.draw_background()
+        
+        # Draw all sprites with camera offset
+        for sprite in sorted(self.all_sprites, key=lambda s: 1 if isinstance(s, Player) else 0):
+            offset_pos = sprite.rect.topleft + self.camera_offset
+            self.display_surface.blit(sprite.image, offset_pos)
+    
     def start(self):
         """Start the level"""
         self.active = True
@@ -558,10 +632,13 @@ class Level:
         self.enemy_sprites.empty()
         self.powerup_sprites.empty()
         self.finish_sprites.empty()
+        self.checkpoint_sprites.empty()
         
         # Reset status
         self.active = False
         self.completed = False
+        self.current_checkpoint = None
+        self.checkpoint_positions = []
         
         # Reset camera
         self.camera_offset = pygame.math.Vector2(0, 0)
@@ -580,7 +657,3 @@ class Level:
         if self.player:
             return self.player.position_history
         return []
-    
-    def get_player_position_history(self):
-        """Get the player's position history for ghost replay"""
-        return self.player.position_history

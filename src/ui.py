@@ -31,26 +31,35 @@ class UI:
         self.powerup_display_time = 0
         self.powerup_duration = 3000  # Display for 3 seconds
     
-    def create_main_menu(self):
-        """Create the main menu with enhanced visuals"""
-        # Create a custom theme with premium styling
-        theme = pygame_menu.themes.THEME_DARK.copy()
-        theme.widget_font_size = 36
+    def create_modern_theme(self):
+        """Create a modern theme for menus"""
+        theme = pygame_menu.themes.Theme()
+        theme.title_background_color = (20, 20, 60, 230)
+        theme.background_color = (30, 30, 50, 200)
+        theme.widget_font = pygame_menu.font.FONT_OPEN_SANS_BOLD
+        theme.title_font = pygame_menu.font.FONT_OPEN_SANS_BOLD
         theme.title_font_size = 60
-        theme.title_background_color = (0, 0, 100, 200)
-        theme.background_color = (0, 0, 50, 150)  # More transparent for better visuals
-        theme.widget_font_color = (255, 255, 255)
+        theme.widget_font_size = 36
+        theme.widget_font_color = (220, 220, 255)
+        theme.title_font_color = (255, 255, 255)
+        theme.selection_color = (0, 120, 215)
         theme.widget_alignment = pygame_menu.locals.ALIGN_CENTER
-        
-        # Enhanced UI with custom colors and styling
+        theme.widget_margin = (0, 12)
+        theme.widget_padding = 12
+        theme.title_bar_style = pygame_menu.widgets.MENUBAR_STYLE_SIMPLE
         theme.title_font_shadow = True
         theme.title_font_shadow_color = (0, 0, 0)
-        theme.title_font_shadow_offset = 3
+        theme.title_font_shadow_offset = 2
         theme.widget_font_shadow = True
         theme.widget_font_shadow_color = (0, 0, 0)
         theme.widget_font_shadow_offset = 2
-        theme.widget_margin = (0, 12)
-        theme.widget_padding = 12
+        theme.cursor_selection_color = (0, 120, 215)
+        return theme
+    
+    def create_main_menu(self):
+        """Create the main menu with enhanced visuals"""
+        # Create a custom theme with premium styling
+        theme = self.create_modern_theme()
         
         # Create the menu with a custom background
         self.main_menu = pygame_menu.Menu(
@@ -109,22 +118,10 @@ class UI:
     
     def create_pause_menu(self):
         """Create the pause menu with premium styling"""
-        theme = pygame_menu.themes.THEME_DARK.copy()
-        theme.widget_font_size = 36
+        theme = self.create_modern_theme()
         theme.title_font_size = 45
         theme.title_background_color = (0, 0, 100, 200)
         theme.background_color = (0, 0, 50, 180)
-        theme.widget_font_color = (255, 255, 255)
-        
-        # Enhanced UI with custom colors and styling
-        theme.title_font_shadow = True
-        theme.title_font_shadow_color = (0, 0, 0)
-        theme.title_font_shadow_offset = 3
-        theme.widget_font_shadow = True
-        theme.widget_font_shadow_color = (0, 0, 0)
-        theme.widget_font_shadow_offset = 2
-        theme.widget_margin = (0, 15)
-        theme.widget_padding = 15
         
         self.pause_menu = pygame_menu.Menu(
             'GAME PAUSED', 
@@ -166,22 +163,10 @@ class UI:
     
     def create_game_over_menu(self):
         """Create the game over menu with premium styling"""
-        theme = pygame_menu.themes.THEME_DARK.copy()
-        theme.widget_font_size = 36
+        theme = self.create_modern_theme()
         theme.title_font_size = 55
         theme.title_background_color = (150, 0, 0, 220)
         theme.background_color = (50, 0, 0, 180)
-        theme.widget_font_color = (255, 255, 255)
-        
-        # Enhanced UI with custom colors and styling
-        theme.title_font_shadow = True
-        theme.title_font_shadow_color = (0, 0, 0)
-        theme.title_font_shadow_offset = 3
-        theme.widget_font_shadow = True
-        theme.widget_font_shadow_color = (0, 0, 0)
-        theme.widget_font_shadow_offset = 2
-        theme.widget_margin = (0, 15)
-        theme.widget_padding = 15
         
         self.game_over_menu = pygame_menu.Menu(
             'GAME OVER', 
@@ -221,22 +206,10 @@ class UI:
     
     def create_victory_menu(self):
         """Create the victory menu with premium styling"""
-        theme = pygame_menu.themes.THEME_DARK.copy()
-        theme.widget_font_size = 36
+        theme = self.create_modern_theme()
         theme.title_font_size = 55
         theme.title_background_color = (0, 120, 0, 220)
         theme.background_color = (20, 60, 20, 180)
-        theme.widget_font_color = (255, 255, 255)
-        
-        # Enhanced UI with custom colors and styling
-        theme.title_font_shadow = True
-        theme.title_font_shadow_color = (0, 0, 0)
-        theme.title_font_shadow_offset = 3
-        theme.widget_font_shadow = True
-        theme.widget_font_shadow_color = (0, 0, 0)
-        theme.widget_font_shadow_offset = 2
-        theme.widget_margin = (0, 15)
-        theme.widget_padding = 15
         
         self.victory_menu = pygame_menu.Menu(
             'LEVEL COMPLETE!', 
@@ -320,6 +293,8 @@ class UI:
             self.powerup_message = "INVINCIBILITY!"
         elif powerup_type.lower() == "extra life":
             self.powerup_message = "EXTRA LIFE!"
+        elif powerup_type.lower() == "checkpoint reached!":
+            self.powerup_message = "CHECKPOINT REACHED!"
         else:
             self.powerup_message = powerup_type.upper() + "!"
             
