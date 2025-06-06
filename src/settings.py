@@ -59,9 +59,4 @@ LEADERBOARD_PATH = "data/leaderboard.json"
 GHOST_RUNS_PATH = "data/ghost_runs/"
 MAPS_PATH = "assets/maps/"
 # Level settings
-LEVEL_COUNT = 3  # Number of levels in the game
-IMAGES_PATH = "assets/images/"
-AUDIO_PATH = "assets/audio/"
-
-# Level settings
 LEVEL_COUNT = 2  # Number of levels in the game
