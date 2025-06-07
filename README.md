@@ -13,7 +13,6 @@ SpeedRunner X challenges players to navigate through increasingly difficult leve
 
 ![Game Screenshot 1](images/gameplay_screenshot.png)
 
-*Add your first gameplay screenshot to the images folder as "gameplay_screenshot.png"*
 
 ## ✨ Key Features
 
@@ -69,7 +68,6 @@ SpeedRunner X challenges players to navigate through increasingly difficult leve
 
 ![Game Screenshot 2](images/level_screenshot.png)
 
-*Add your second gameplay screenshot to the images folder as "level_screenshot.png"*
 
 ## 📸 Game Screenshots
 
@@ -80,7 +78,6 @@ Here are some screenshots showcasing SpeedRunner X:
 | ![Gameplay Screenshot](images/gameplay_screenshot.png) | ![Level Screenshot](images/level_screenshot.png) |
 | *Fast-paced platforming action* | *Challenging level design with multiple paths* |
 
-*Note: Add your screenshots to the images folder with the filenames "gameplay_screenshot.png" and "level_screenshot.png"*
 
 ### Tech Stack
 - **Python 3.8+**: Core programming language
@@ -126,4 +123,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ---
 
-Made with ❤️ by [Your Name]
