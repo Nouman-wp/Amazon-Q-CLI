@@ -11,6 +11,7 @@ from src.level import Level
 from src.ui import UI
 from src.leaderboard import Leaderboard
 from src.ghost import Ghost
+from src.menu_effects import MenuEffects
 
 class Game:
     def __init__(self):
@@ -39,6 +40,9 @@ class Game:
         self.ui = UI(self.screen)
         self.setup_ui_callbacks()
         
+        # Create menu effects
+        self.menu_effects = MenuEffects(self.screen)
+        
         # Create leaderboard
         self.leaderboard = Leaderboard()
         
@@ -48,11 +52,16 @@ class Game:
     
     def setup_ui_callbacks(self):
         """Set up UI menu callbacks"""
+        # Main menu callbacks
         self.ui.start_game = self.start_game
         self.ui.show_leaderboard = self.show_leaderboard
+        
+        # Pause menu callbacks
         self.ui.resume_game = self.resume_game
         self.ui.restart_level = self.restart_level
         self.ui.quit_to_menu = self.quit_to_menu
+        
+        # Victory menu callbacks
         self.ui.next_level = self.next_level
     
     def load_level(self, level_name):
@@ -197,6 +206,9 @@ class Game:
         self.screen.fill(BLACK)
         
         if self.state == STATE_MENU:
+            # Draw animated menu background
+            self.menu_effects.draw_main_menu_effects()
+            
             # Handle menu events
             events = pygame.event.get()
             
