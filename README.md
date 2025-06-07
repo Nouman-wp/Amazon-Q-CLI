@@ -11,7 +11,9 @@ A lightning-fast 2D platformer focused on speedrunning, built with Python and Py
 
 SpeedRunner X challenges players to navigate through increasingly difficult levels as quickly as possible. Race against your previous best times shown as ghost replays, master advanced movement mechanics, and climb the leaderboards!
 
-![Game Screenshot Placeholder]
+![Game Screenshot 1](images/gameplay_screenshot.png)
+
+*Add your first gameplay screenshot to the images folder as "gameplay_screenshot.png"*
 
 ## ✨ Key Features
 
@@ -65,7 +67,20 @@ SpeedRunner X challenges players to navigate through increasingly difficult leve
 - Perfect your route through each level to achieve the best times
 - Study your ghost replays to identify areas for improvement
 
-## 🛠️ Development
+![Game Screenshot 2](images/level_screenshot.png)
+
+*Add your second gameplay screenshot to the images folder as "level_screenshot.png"*
+
+## 📸 Game Screenshots
+
+Here are some screenshots showcasing SpeedRunner X:
+
+| Gameplay Action | Level Design |
+|:---------------:|:------------:|
+| ![Gameplay Screenshot](images/gameplay_screenshot.png) | ![Level Screenshot](images/level_screenshot.png) |
+| *Fast-paced platforming action* | *Challenging level design with multiple paths* |
+
+*Note: Add your screenshots to the images folder with the filenames "gameplay_screenshot.png" and "level_screenshot.png"*
 
 ### Tech Stack
 - **Python 3.8+**: Core programming language
